@@ -4,6 +4,8 @@ import { UserList } from '../components/UserList';
 
 import AlertsList from '../components/AlertsList';
 
+import SensorSettings from '../components/SensorSettings';
+
 const Settings = () => {
   const [activeTab, setActiveTab] = useState('cuenta');
 
@@ -135,63 +137,18 @@ const Settings = () => {
 
 
 
-    // security: {
-    //   title: 'Security Settings',
-    //   description: 'Manage your security preferences',
-    //   content: (
-    //     <div className="space-y-6">
-    //       <div className="space-y-4">
-    //         <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200">Change Password</h3>
-    //         <form className="space-y-4">
-    //           <div>
-    //             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-    //               Current Password
-    //             </label>
-    //             <input
-    //               type="password"
-    //               className="w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-gray-200"
-    //             />
-    //           </div>
-    //           <div>
-    //             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-    //               New Password
-    //             </label>
-    //             <input
-    //               type="password"
-    //               className="w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-gray-200"
-    //             />
-    //           </div>
-    //           <div>
-    //             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-    //               Confirm New Password
-    //             </label>
-    //             <input
-    //               type="password"
-    //               className="w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:text-gray-200"
-    //             />
-    //           </div>
-    //           <button className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
-    //             Update Password
-    //           </button>
-    //         </form>
-    //       </div>
+    sensores: {
+      title: 'Configuración de Sensores',
+      description: 'Administra la configuración y preferencias de tus sensores',
+      content: (
+        <div className="space-y-6">
           
-    //       <div className="space-y-4">
-    //         <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200">Two-Factor Authentication</h3>
-    //         <div className="flex items-center justify-between">
-    //           <div>
-    //             <p className="text-gray-800 dark:text-gray-200">Enable 2FA</p>
-    //             <p className="text-sm text-gray-500 dark:text-gray-400">Add an extra layer of security to your account</p>
-    //           </div>
-    //           <label className="relative inline-flex items-center cursor-pointer">
-    //             <input type="checkbox" className="sr-only peer" />
-    //             <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
-    //           </label>
-    //         </div>
-    //       </div>
-    //     </div>
-    //   )
-    // },
+          <SensorSettings />
+    
+        </div>
+      )
+    },
+    
 
 
 
