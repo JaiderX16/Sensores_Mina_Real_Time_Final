@@ -93,7 +93,7 @@ const Navbar = ({ toggleSidebar, darkMode, toggleDarkMode }) => {
             </button>
 
             {showNotifications && (
-              <div className="absolute right-0 mt-2 w-96 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-100 dark:border-gray-700 py-2">
+              <div className="fixed right-0 mt-4 w-80 md:w-96 lg:w-96 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-100 dark:border-gray-700 py-2" style={{ right: '10px', top: '60px' }}>
                 <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-700">
                   <h3 className="font-medium text-gray-800 dark:text-gray-200">Notificaciones</h3>
                 </div>
