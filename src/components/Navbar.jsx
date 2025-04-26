@@ -1,29 +1,62 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Menu, Bell, User, Moon, Sun } from 'lucide-react';
 
-const notifications = [
-  {
-    id: 1,
-    title: 'New Project Created',
-    message: 'Project Alpha has been created',
-    time: '2 minutes ago'
-  },
-  {
-    id: 2,
-    title: 'Task Completed',
-    message: 'Database migration completed successfully',
-    time: '1 hour ago'
-  },
-  {
-    id: 3,
-    title: 'System Update',
-    message: 'New features have been deployed',
-    time: '3 hours ago'
-  }
-];
+import AlertsList from './AlertsList';
 
 const Navbar = ({ toggleSidebar, darkMode, toggleDarkMode }) => {
   const [showNotifications, setShowNotifications] = useState(false);
+  const [areas, setAreas] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [userData, setUserData] = useState({
+    nombre: '',
+    apellido: '',
+    correo_electronico: ''
+  });
+
+  useEffect(() => {
+    // Cargar datos del usuario desde localStorage
+    const userDataStr = localStorage.getItem('userData');
+    if (userDataStr) {
+      try {
+        const storedData = JSON.parse(userDataStr);
+        setUserData({
+          nombre: storedData.nombre_usuario || storedData.nombre || '',
+          apellido: storedData.apellido_usuario || storedData.apellido || '',
+          correo_electronico: storedData.correo_electronico || ''
+        });
+      } catch (error) {
+        console.error('Error al parsear datos del usuario:', error);
+      }
+    }
+
+    // Cargar áreas desde la API
+    const fetchAreas = async () => {
+      try {
+        const response = await fetch('https://apisensoresmina-production.up.railway.app/api/areas', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          mode: 'cors'
+        });
+
+        if (!response.ok) {
+          throw new Error('Error al cargar las áreas');
+        }
+
+        const areasData = await response.json();
+        setAreas(areasData);
+      } catch (err) {
+        console.error('Error:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAreas();
+  }, []);
 
   return (
     <header className="bg-white dark:bg-gray-800 shadow-sm z-10">
@@ -60,36 +93,28 @@ const Navbar = ({ toggleSidebar, darkMode, toggleDarkMode }) => {
             </button>
 
             {showNotifications && (
-              <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-100 dark:border-gray-700 py-2">
+              <div className="absolute right-0 mt-2 w-96 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-100 dark:border-gray-700 py-2">
                 <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-700">
-                  <h3 className="font-medium text-gray-800 dark:text-gray-200">Notifications</h3>
+                  <h3 className="font-medium text-gray-800 dark:text-gray-200">Notificaciones</h3>
                 </div>
-                <div className="max-h-96 overflow-y-auto">
-                  {notifications.map((notification) => (
-                    <div 
-                      key={notification.id}
-                      className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer"
-                    >
-                      <div className="flex items-start">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                            {notification.title}
-                          </p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-                            {notification.message}
-                          </p>
-                          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                            {notification.time}
-                          </p>
+                <div className="max-h-96 overflow-y-auto custom-scrollbar">
+                  <div className="space-y-4 p-3">
+                    {loading ? (
+                      <div className="text-gray-500 dark:text-gray-400 text-sm">Cargando áreas...</div>
+                    ) : error ? (
+                      <div className="text-red-500 text-sm">Error: {error}</div>
+                    ) : (
+                      areas.map((area, index) => (
+                        <div key={area.id} className="pb-3">
+                          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
+                            <span className={`${index === 0 ? 'bg-blue-500' : 'bg-green-500'} w-1.5 h-5 mr-2 rounded`}></span>
+                            {area.nombre_area}
+                          </h4>
+                          <AlertsList areaId={area.id} compact={true} />
                         </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="px-4 py-2 border-t border-gray-100 dark:border-gray-700">
-                  <button className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300">
-                    View all notifications
-                  </button>
+                      ))
+                    )}
+                  </div>
                 </div>
               </div>
             )}
@@ -100,8 +125,8 @@ const Navbar = ({ toggleSidebar, darkMode, toggleDarkMode }) => {
               <User size={18} />
             </div>
             <div className="ml-2 hidden md:block">
-              <p className="text-sm font-medium text-gray-900 dark:text-gray-200">Admin User</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">admin@example.com AQUI PONER LOS DATOS DEL USUARIO</p>
+              <p className="text-sm font-medium text-gray-900 dark:text-gray-200">{userData.nombre} {userData.apellido}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{userData.correo_electronico}</p>
             </div>
           </div>
         </div>

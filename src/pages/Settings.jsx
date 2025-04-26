@@ -11,6 +11,9 @@ import UserProfile from '../components/UserProfile';
 const Settings = () => {
   const [activeTab, setActiveTab] = useState('cuenta');
   const [userRole, setUserRole] = useState(null);
+  const [areas, setAreas] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const userDataStr = localStorage.getItem('userData');
@@ -28,6 +31,34 @@ const Settings = () => {
     }
   }, []);
 
+  useEffect(() => {
+    const fetchAreas = async () => {
+      try {
+        const response = await fetch('https://apisensoresmina-production.up.railway.app/api/areas', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          mode: 'cors'
+        });
+
+        if (!response.ok) {
+          throw new Error('Error al cargar las áreas');
+        }
+
+        const areasData = await response.json();
+        setAreas(areasData);
+      } catch (err) {
+        console.error('Error:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAreas();
+  }, []);
+
   const tabs = {
     cuenta: {
       title: 'Cuenta',
@@ -35,41 +66,29 @@ const Settings = () => {
       content: <UserProfile />
     },
 
-
-
     notificaciones: {
       title: 'Notificaciones',
       description: 'Administra las notificaciones.',
       content: (
         <div className="space-y-6">
-          
-     
-          <div>
-            <h1 className="text-white font-bold text-xl mb-6 flex items-center">
-              <span className="bg-blue-500 w-2 h-8 mr-3 rounded"></span>
-              Área Externa - Bocamina
-            </h1>
-            <AlertsList areaId={1} /> {/* Pasamos el ID del área */}
-          </div>
-     
-
-
-          <div>
-            <h1 className="text-white font-bold text-xl mb-6 flex items-center">
-              <span className="bg-green-500 w-2 h-8 mr-3 rounded"></span>
-              Área de Operación - Rampa
-            </h1>
-            <AlertsList areaId={2} /> 
-          </div>
+          {loading ? (
+            <div className="text-white">Cargando áreas...</div>
+          ) : error ? (
+            <div className="text-red-500">Error: {error}</div>
+          ) : (
+            areas.map((area, index) => (
+              <div key={area.id}>
+                <h1 className="text-white font-bold text-xl mb-6 flex items-center">
+                  <span className={`${index === 0 ? 'bg-blue-500' : 'bg-green-500'} w-2 h-8 mr-3 rounded`}></span>
+                  {area.nombre_area}
+                </h1>
+                <AlertsList areaId={area.id} />
+              </div>
+            ))
+          )}
         </div>
       )
     },
-
-
-
-
-
-
 
     ...(userRole === 'admin' ? {
       sensores: {

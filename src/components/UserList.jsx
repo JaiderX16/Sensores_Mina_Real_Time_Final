@@ -217,7 +217,7 @@ export function UserList() {
             {/* Modal de Edición - Movido fuera del contenedor principal */}
             {showModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50" style={{position: 'fixed', top: -40, left: 0, right: 0, bottom: 0}}>
-                    <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md">
+                    <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md mx-2">
                         <div className="flex justify-between items-center mb-4">
                             <h3 className="text-xl font-semibold text-white">Editar Usuario</h3>
                             <button 
