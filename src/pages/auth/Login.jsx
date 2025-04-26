@@ -34,16 +34,32 @@ export function Login() {
             const data = await response.json();
             console.log("Datos recibidos en login:", data);
 
-
             if (response.ok) {
                 setMessageType('success');
                 setMessage('¡Login exitoso!');
-                // Store the token correctly
-                localStorage.setItem('token', data.token);
-                // Store only the userData object
-                localStorage.setItem('userData', JSON.stringify(data.userData));
+                
+                // Asegurarnos de que guardamos los datos correctamente
+                const userDataToStore = {
+                    rol: data.user?.rol || data.rol, // Primero intentamos data.user.rol
+                    nombre: data.user?.nombre || data.nombre,
+                    correo_electronico: data.user?.correo_electronico || data.correo_electronico,
+                    id: data.user?.id || data.id
+                };
+                
+                console.log("Datos a guardar:", userDataToStore);
+                
+                // Solo guardar si tenemos al menos el rol
+                if (userDataToStore.rol) {
+                    localStorage.setItem('userData', JSON.stringify(userDataToStore));
+                    localStorage.setItem('token', data.token);
+                } else {
+                    console.error('No se encontró el rol del usuario en la respuesta:', data);
+                }
 
-                // Redirige al dashboard después de 1 segundo
+                // Verificar que se guardó correctamente
+                const savedData = localStorage.getItem('userData');
+                console.log("Datos guardados verificación:", savedData);
+
                 setTimeout(() => {
                     navigate('/dashboard', { replace: true });
                 }, 1000);

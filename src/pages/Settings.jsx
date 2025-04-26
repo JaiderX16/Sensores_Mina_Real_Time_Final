@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { UserList } from '../components/UserList';
 
@@ -6,99 +6,33 @@ import AlertsList from '../components/AlertsList';
 
 import SensorSettings from '../components/SensorSettings';
 
+import UserProfile from '../components/UserProfile';
+
 const Settings = () => {
   const [activeTab, setActiveTab] = useState('cuenta');
+  const [userRole, setUserRole] = useState(null);
+
+  useEffect(() => {
+    const userDataStr = localStorage.getItem('userData');
+    if (!userDataStr) {
+      setUserRole('user'); // Establecemos un rol por defecto si no hay datos
+      return;
+    }
+
+    try {
+      const userData = JSON.parse(userDataStr);
+      setUserRole(userData?.rol || 'user'); // Si no hay rol, establecemos 'user' por defecto
+    } catch (error) {
+      console.error('Error al parsear datos de usuario:', error);
+      setUserRole('user'); // En caso de error, establecemos un rol por defecto
+    }
+  }, []);
 
   const tabs = {
-    
-    
-    
     cuenta: {
       title: 'Cuenta',
       description: 'Administra la información de tu cuenta y tus preferencias.',
-      content: (
-        <div className="w-full">
-          <div className="max-w-3xl mx-auto">
-            <form className="space-y-5">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Nombre de Usuario
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-gray-200"
-                    defaultValue="Jaider"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Apellido
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-gray-200"
-                    defaultValue="Paraguay Junco" 
-                    // Eliom,inar esa locura del default, eso se debe completar con los datos de la base de datos
-                  />
-                </div>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Correo Electrónico
-                </label>
-                <input
-                  type="email"
-                  className="w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-gray-200"
-                  defaultValue="jaider@gmail.com"
-                />
-              </div>
-              
-              <div>
-                <label
-                  htmlFor="editRol"
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                >
-                  Rol
-                </label>
-                <select
-                  id="editRol"
-                  name="rol"
-                  required
-                  className="w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-transparent dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  defaultValue="user"
-                  disabled={true}  // El rol no debería ser editable por el usuario
-                >
-                  <option value="user" className="bg-gray-700">Usuario</option>
-                  <option value="admin" className="bg-gray-700">Administrador</option>
-                </select>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                  El rol solo puede ser modificado por un administrador del sistema
-                </p>
-              </div>
-              
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Cargo
-                </label>
-                <input
-                  type="text"
-                  className="w-full p-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-gray-200"
-                  defaultValue="Desarrollador"
-                />
-              </div>
-              
-              <div className="pt-2">
-                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                  Guardar Cambios
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )
+      content: <UserProfile />
     },
 
 
@@ -137,34 +71,27 @@ const Settings = () => {
 
 
 
-    sensores: {
-      title: 'Configuración de Sensores',
-      description: 'Administra la configuración y preferencias de tus sensores',
-      content: (
-        <div className="space-y-6">
-          
-          <SensorSettings />
-    
-        </div>
-      )
-    },
-    
+    ...(userRole === 'admin' ? {
+      sensores: {
+        title: 'Configuración de Sensores',
+        description: 'Administra la configuración y preferencias de tus sensores',
+        content: (
+          <div className="space-y-6">
+            <SensorSettings />
+          </div>
+        )
+      },
 
-
-
-
-
-    usuarios: {
-      title: 'Usuarios',
-      description: 'Administra los perfiles, permisos y configuraciones de los usuarios de tu plataforma',
-      content: (
-        <div className="space-y-6">
-          <UserList />
-        </div>
-      )
-    }
-
-
+      usuarios: {
+        title: 'Usuarios',
+        description: 'Administra los perfiles, permisos y configuraciones de los usuarios de tu plataforma',
+        content: (
+          <div className="space-y-6">
+            <UserList />
+          </div>
+        )
+      }
+    } : {})
   };
 
 
