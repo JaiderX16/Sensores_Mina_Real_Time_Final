@@ -34,7 +34,7 @@ export default function SensorMetricCard({
           color={color}
         />
         <p className="text-sm text-gray-400 mt-3 pb-2">
-          Límite: {minThreshold} - {maxThreshold} {unit}
+          Umbral: {minThreshold} - {maxThreshold} {unit}
         </p>
       </div>
     </div>

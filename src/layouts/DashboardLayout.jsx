@@ -4,7 +4,7 @@ import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
 import Dashboard from '../pages/Dashboard';
 import Analytics from '../pages/Analytics';
-import Projects from '../pages/Projects';
+import Notifications from '../pages/Notifications';
 import Settings from '../pages/Settings';
 
 const DashboardLayout = () => {
@@ -36,7 +36,7 @@ const DashboardLayout = () => {
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/analytics" element={<Analytics />} />
-            <Route path="/projects" element={<Projects />} />
+            <Route path="/notifications" element={<Notifications />} />
             <Route path="/settings" element={<Settings />} />
           </Routes>
         </main>

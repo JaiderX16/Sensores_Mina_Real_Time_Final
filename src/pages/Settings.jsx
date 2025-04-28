@@ -3,8 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { UserList } from '../components/UserList';
 import { RegisterUser } from '../components/RegisterUser';
 
-import AlertsList from '../components/AlertsList';
-
 import SensorSettings from '../components/SensorSettings';
 
 import UserProfile from '../components/UserProfile';
@@ -66,30 +64,6 @@ const Settings = () => {
       title: 'Cuenta',
       description: 'Administra la información de tu cuenta y tus preferencias.',
       content: <UserProfile />
-    },
-
-    notificaciones: {
-      title: 'Notificaciones',
-      description: 'Administra las notificaciones.',
-      content: (
-        <div className="space-y-6">
-          {loading ? (
-            <div className="text-white">Cargando áreas...</div>
-          ) : error ? (
-            <div className="text-red-500">Error: {error}</div>
-          ) : (
-            areas.map((area, index) => (
-              <div key={area.id}>
-                <h1 className="text-white font-bold text-xl mb-6 flex items-center">
-                  <span className={`${index === 0 ? 'bg-blue-500' : 'bg-green-500'} w-2 h-8 mr-3 rounded`}></span>
-                  {area.nombre_area}
-                </h1>
-                <AlertsList areaId={area.id} />
-              </div>
-            ))
-          )}
-        </div>
-      )
     },
 
     ...(userRole === 'admin' ? {

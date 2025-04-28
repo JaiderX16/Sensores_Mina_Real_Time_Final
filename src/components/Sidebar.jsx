@@ -8,7 +8,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
   const navItems = [
     { path: '/', name: 'Dashboard', icon: <LayoutDashboard size={20} /> },
     { path: '/dashboard/analytics', name: 'Analytics', icon: <BarChart2 size={20} /> },
-    { path: '/dashboard/projects', name: 'Projects', icon: <FolderKanban size={20} /> },
+    { path: '/dashboard/notifications', name: 'Notifications', icon: <FolderKanban size={20} /> },
     { path: '/dashboard/settings', name: 'Settings', icon: <Settings size={20} /> },
   ];
 

@@ -82,9 +82,9 @@ const Analytics = () => {
     
     if (!areaMediciones || areaMediciones.length === 0) return [];
     
-    // Ordenar por timestamp
+    // Ordenar por timestamp (más recientes primero)
     const sortedData = [...areaMediciones].sort((a, b) => 
-      new Date(a.timestamp) - new Date(b.timestamp)
+      new Date(b.timestamp) - new Date(a.timestamp)
     );
     
     return sortedData.map(medicion => {
@@ -103,6 +103,32 @@ const Analytics = () => {
         valor: valor
       };
     });
+  };
+
+  // Función para obtener los umbrales de un tipo de sensor específico
+  const getSensorThresholds = (areaId, tipoSensor) => {
+    // Filtrar sensores por área y tipo
+    const sensorFiltrado = sensores.find(sensor => 
+      sensor.area_id === areaId && 
+      (sensor.tipo_sensor === tipoSensor || 
+       sensor.nombre_sensor.includes(tipoSensor))
+    );
+    
+    if (sensorFiltrado) {
+      return {
+        min: parseFloat(sensorFiltrado.umbral_min || 0),
+        max: parseFloat(sensorFiltrado.umbral_max || 100)
+      };
+    }
+    
+    // Valores predeterminados si no se encuentra el sensor
+    const defaultThresholds = {
+      temperature: { min: 20, max: 40 },
+      velocity: { min: 5, max: 30 },
+      flow: { min: 60, max: 120 }
+    };
+    
+    return defaultThresholds[tipoSensor] || { min: 0, max: 100 };
   };
 
   if (loading) {
@@ -131,6 +157,11 @@ const Analytics = () => {
             new Date(current.timestamp) > new Date(latest.timestamp) ? current : latest
           ) : null;
         
+        // Obtener umbrales para cada tipo de sensor
+        const tempThresholds = getSensorThresholds(areaId, "Temperatura");
+        const velocityThresholds = getSensorThresholds(areaId, "Velocidad");
+        const flowThresholds = getSensorThresholds(areaId, "Flujo");
+        
         return (
           <div className="mb-12" key={area.id}>
             <h1 className='text-white font-bold text-2xl mb-6 flex items-center'>
@@ -138,7 +169,7 @@ const Analytics = () => {
               {area.nombre_area}
             </h1>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-6">
               {/* Gráfico de Temperatura */}
               <div>
                 <SensorChart
@@ -147,8 +178,8 @@ const Analytics = () => {
                   dataKey="valor"
                   lineColor="#ef4444"
                   name="Temperatura"
-                  minThreshold={20}
-                  maxThreshold={40}
+                  minThreshold={tempThresholds.min}
+                  maxThreshold={tempThresholds.max}
                 />
               </div>
               
@@ -160,8 +191,8 @@ const Analytics = () => {
                   dataKey="valor"
                   lineColor="#3b82f6"
                   name="Velocidad"
-                  minThreshold={5}
-                  maxThreshold={30}
+                  minThreshold={velocityThresholds.min}
+                  maxThreshold={velocityThresholds.max}
                 />
               </div>
               
@@ -173,8 +204,8 @@ const Analytics = () => {
                   dataKey="valor"
                   lineColor="#10b981"
                   name="Flujo"
-                  minThreshold={60}
-                  maxThreshold={120}
+                  minThreshold={flowThresholds.min}
+                  maxThreshold={flowThresholds.max}
                 />
               </div>
             </div>

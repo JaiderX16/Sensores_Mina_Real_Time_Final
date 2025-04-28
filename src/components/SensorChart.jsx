@@ -25,6 +25,46 @@ export default function SensorChart({
     return [min - padding, max + padding];
   };
 
+  // Colores para los umbrales
+  const minThresholdColor = "#FBBF24"; // Amarillo
+  const maxThresholdColor = "#EF4444"; // Rojo
+
+  // Personalizar la leyenda para incluir los umbrales
+  const CustomLegend = (props) => {
+    const { payload } = props;
+    
+    return (
+      <div className="flex flex-wrap justify-center items-center gap-4 mt-2">
+        {payload.map((entry, index) => (
+          <div key={`item-${index}`} className="flex items-center">
+            <svg width="16" height="16" viewBox="0 0 32 32" className="mr-1">
+              <path d="M0,14h10v4H0z" fill={entry.color} />
+              <path d="M22,14h10v4H22z" fill={entry.color} />
+              <circle cx="16" cy="16" r="6" fill="none" stroke={entry.color} strokeWidth="3" />
+            </svg>
+            <span style={{ color: entry.color }} className="text-sm font-medium">{entry.value}</span>
+          </div>
+        ))}
+        <div className="flex items-center">
+          <svg width="16" height="16" viewBox="0 0 32 32" className="mr-1">
+            <path d="M0,14h10v4H0z" fill={minThresholdColor} />
+            <path d="M22,14h10v4H22z" fill={minThresholdColor} />
+            <circle cx="16" cy="16" r="6" fill="none" stroke={minThresholdColor} strokeWidth="3" />
+          </svg>
+          <span style={{ color: minThresholdColor }} className="text-sm font-medium">Mín: {minThreshold}</span>
+        </div>
+        <div className="flex items-center">
+          <svg width="16" height="16" viewBox="0 0 32 32" className="mr-1">
+            <path d="M0,14h10v4H0z" fill={maxThresholdColor} />
+            <path d="M22,14h10v4H22z" fill={maxThresholdColor} />
+            <circle cx="16" cy="16" r="6" fill="none" stroke={maxThresholdColor} strokeWidth="3" />
+          </svg>
+          <span style={{ color: maxThresholdColor }} className="text-sm font-medium">Máx: {maxThreshold}</span>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="bg-gray-800 rounded-lg shadow pr-2 py-4">
       <h2 className="text-xl font-semibold mb-4 text-white ml-6">{title}</h2>
@@ -54,19 +94,19 @@ export default function SensorChart({
                 color: '#fff',
               }}
             />
-            <Legend />
+            <Legend content={<CustomLegend />} />
             
-            {/* Líneas de umbral */}
+            {/* Líneas de umbral con colores diferentes */}
             <ReferenceLine 
               y={minThreshold}
-              stroke={thresholdColor}
+              stroke={minThresholdColor}
               strokeDasharray="3 3"
               name="Min Umbral"
               dot={false}
             />
             <ReferenceLine 
               y={maxThreshold}
-              stroke={thresholdColor}
+              stroke={maxThresholdColor}
               strokeDasharray="3 3"
               name="Max Umbral"
               dot={false}
