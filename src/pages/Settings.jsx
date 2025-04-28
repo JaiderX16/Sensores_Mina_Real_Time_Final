@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 import { UserList } from '../components/UserList';
+import { RegisterUser } from '../components/RegisterUser';
 
 import AlertsList from '../components/AlertsList';
 
@@ -14,6 +15,7 @@ const Settings = () => {
   const [areas, setAreas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showAddUserModal, setShowAddUserModal] = useState(false);
 
   useEffect(() => {
     const userDataStr = localStorage.getItem('userData');
@@ -106,6 +108,14 @@ const Settings = () => {
         description: 'Administra los perfiles, permisos y configuraciones de los usuarios de tu plataforma',
         content: (
           <div className="space-y-6">
+            <div className="flex justify-end mb-4">
+              <button
+                onClick={() => setShowAddUserModal(true)}
+                className="bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-bold py-2 px-4 rounded-md hover:from-indigo-600 hover:to-blue-600 transition ease-in-out duration-150"
+              >
+                Agregar Usuario
+              </button>
+            </div>
             <UserList />
           </div>
         )
@@ -113,7 +123,29 @@ const Settings = () => {
     } : {})
   };
 
-
+  // Modal para agregar usuario
+  const AddUserModal = () => {
+    if (!showAddUserModal) return null;
+    
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+        <div className="bg-gray-800 rounded-xl pt-6 w-full max-w-md mx-2">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-2xl font-bold text-center text-white ml-6">Registro de Usuario</h3>
+            <button 
+              onClick={() => setShowAddUserModal(false)}
+              className="text-gray-400 hover:text-white mr-6"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <RegisterUser />
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="animate-fade-in">
@@ -143,6 +175,9 @@ const Settings = () => {
           {tabs[activeTab].content}
         </div>
       </div>
+      
+      {/* Modal para agregar usuario */}
+      <AddUserModal />
     </div>
   );
 };
