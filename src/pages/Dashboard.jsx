@@ -46,8 +46,8 @@ const Dashboard = () => {
         const sensoresData = await sensoresResponse.json();
         setSensores(sensoresData);
 
-        // Obtener mediciones
-        const medicionesResponse = await fetch('https://apisensoresmina-production.up.railway.app/api/mediciones', {
+        // Obtener mediciones en tiempo real
+        const medicionesResponse = await fetch('https://apisensoresmina-production.up.railway.app/api/mediciones-tiempo-real', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json'
@@ -56,7 +56,7 @@ const Dashboard = () => {
         });
 
         if (!medicionesResponse.ok) {
-          throw new Error('Error al cargar las mediciones');
+          throw new Error('Error al cargar las mediciones en tiempo real');
         }
 
         const medicionesData = await medicionesResponse.json();
@@ -72,8 +72,8 @@ const Dashboard = () => {
 
     fetchData();
 
-    // Actualizar datos cada 30 segundos
-    const interval = setInterval(fetchData, 30000);
+    // Actualizar datos cada 10 segundos para datos en tiempo real
+    const interval = setInterval(fetchData, 10000);
     return () => clearInterval(interval);
   }, []);
 
@@ -88,11 +88,12 @@ const Dashboard = () => {
     
     // Ordenar por timestamp (más recientes primero)
     const sortedData = [...areaMediciones].sort((a, b) => 
-      new Date(b.timestamp) - new Date(a.timestamp)
+      new Date(a.timestamp) - new Date(b.timestamp)
     );
     
     // Obtener el valor según el tipo de sensor
-    const ultimaMedicion = sortedData[0];
+    // Tomamos el último elemento después de ordenar, que será el más reciente
+    const ultimaMedicion = sortedData[sortedData.length - 1];
     let valor = 0;
     
     if (tipoSensor === "temperatura") {
