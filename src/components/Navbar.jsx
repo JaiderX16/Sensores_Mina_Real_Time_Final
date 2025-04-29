@@ -115,11 +115,18 @@ const Navbar = ({ toggleSidebar, darkMode, toggleDarkMode }) => {
         <div className="flex items-center gap-3">
           <button
             onClick={toggleSidebar}
-            className="md:hidden p-1.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            className=" p-1.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             aria-label="Toggle menu"
           >
             <Menu size={22} />
           </button>
+          
+          <div className="items-center">
+            
+            <div>
+              <h1 className="text-lg font-bold text-gray-800 dark:text-white">Compañía de Minas Buenaventura S.A.A.</h1>
+            </div>
+          </div>
         </div>
         
         <div className="flex items-center gap-3">
@@ -184,8 +191,8 @@ const Navbar = ({ toggleSidebar, darkMode, toggleDarkMode }) => {
               <div className="h-9 w-9 rounded-full bg-accent-600 text-white flex items-center justify-center">
                 <User size={18} />
               </div>
-              <div className="ml-2">
-                <p className="text-sm font-medium text-gray-900 dark:text-gray-200">{userData.nombre} {userData.apellido}</p>
+              <div className="ml-2 hidden md:block">
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-200">{userData.nombre}</p>
                 { /* <p className="text-xs text-gray-500 dark:text-gray-400">{userData.correo_electronico}</p> */ }              
                 <p className="text-xs text-gray-500 dark:text-gray-400">{userData.cargo}</p>
               </div>

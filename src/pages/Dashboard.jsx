@@ -143,6 +143,11 @@ const Dashboard = () => {
 
   return (
     <div className="animate-fade-in p-4">
+
+      <div className="text-center mb-6">
+        <h1 className="text-3xl md:text-4xl lg:text-6xl text-white font-bold my-12">Acumulación Yumpag</h1>
+      </div>
+
       <div>
         <DigitalClock />
         {lastUpdate && (
@@ -175,7 +180,7 @@ const Dashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <SensorMetricCard
                 icon="Wind"
-                title="Velocidad del viento"
+                title="Viento"
                 value={velocidadData.valor.toFixed(2)}
                 color="#3b82f6"
                 minThreshold={velocidadThresholds.min.toFixed(2)}
@@ -193,7 +198,7 @@ const Dashboard = () => {
               />
               <SensorMetricCard
                 icon="Droplets"
-                title="Flujo"
+                title="Caudal"
                 value={flujoData.valor.toFixed(2)}
                 color="#f59e0b"
                 minThreshold={flujoThresholds.min.toFixed(2)}

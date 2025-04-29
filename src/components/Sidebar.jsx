@@ -1,9 +1,17 @@
-import React from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { LayoutDashboard, BarChart2, FolderKanban, Settings, X, User } from 'lucide-react';
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Ocultar sidebar automáticamente después de seleccionar una opción
+  useEffect(() => {
+    if (isOpen) {
+      toggleSidebar();
+    }
+  }, [location.pathname]);
 
   const navItems = [
     { path: '/', name: 'Dashboard', icon: <LayoutDashboard size={20} /> },
@@ -22,26 +30,26 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     <>
       {isOpen && (
         <div 
-          className="fixed inset-0 z-20 bg-black/50 md:hidden" 
+          className="fixed inset-0 z-20 bg-black/50" 
           onClick={toggleSidebar}
         ></div>
       )}
       
       <aside
-        className={`fixed md:sticky top-0 left-0 z-30 h-full w-64 bg-white dark:bg-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out md:translate-x-0 ${
+        className={`fixed top-0 left-0 z-30 h-full w-64 bg-white dark:bg-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         <div className="flex items-center justify-between p-4 border-b dark:border-gray-700">
           <div className="flex items-center">
-            <div className="h-8 w-8 bg-primary-600 rounded-md flex items-center justify-center">
+            <div className="h-8 w-8 bg-gradient-to-r from-blue-600 to-blue-800 rounded-md flex items-center justify-center">
               <LayoutDashboard size={20} className="text-white" />
             </div>
             <h1 className="ml-2 text-xl font-semibold text-gray-800 dark:text-gray-200">Dashboard</h1>
           </div>
           <button 
             onClick={toggleSidebar} 
-            className="p-1 rounded-md text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 md:hidden"
+            className="p-1 rounded-md text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
           >
             <X size={20} />
           </button>
@@ -56,7 +64,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                   className={({ isActive }) =>
                     `flex items-center gap-3 px-3 py-3 rounded-lg transition-colors ${
                       isActive
-                        ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300 font-medium'
+                        ? 'bg-gradient-to-r from-blue-600 to-blue-800 text-white font-medium'
                         : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
                     }`
                   }
@@ -82,7 +90,6 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             Cerrar Sesión
           </button>
         </div>
-
       </aside>
     </>
   );
