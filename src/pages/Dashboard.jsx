@@ -88,12 +88,12 @@ const Dashboard = () => {
     
     // Ordenar por timestamp (más recientes primero)
     const sortedData = [...areaMediciones].sort((a, b) => 
-      new Date(a.timestamp) - new Date(b.timestamp)
+      new Date(b.timestamp) - new Date(a.timestamp)
     );
     
     // Obtener el valor según el tipo de sensor
-    // Tomamos el último elemento después de ordenar, que será el más reciente
-    const ultimaMedicion = sortedData[sortedData.length - 1];
+    // Tomamos el primer elemento después de ordenar, que será el más reciente
+    const ultimaMedicion = sortedData[0];
     let valor = 0;
     
     if (tipoSensor === "temperatura") {
@@ -102,6 +102,8 @@ const Dashboard = () => {
       valor = parseFloat(ultimaMedicion.velocity || 0);
     } else if (tipoSensor === "flujo") {
       valor = parseFloat(ultimaMedicion.flow || 0);
+    } else if (tipoSensor === "cobertura") {
+      valor = parseFloat(ultimaMedicion.coverage || 0);
     }
     
     return { valor, timestamp: ultimaMedicion.timestamp };
@@ -165,6 +167,7 @@ const Dashboard = () => {
         const velocidadData = getLastMeasurement(areaId, "velocidad");
         const temperaturaData = getLastMeasurement(areaId, "temperatura");
         const flujoData = getLastMeasurement(areaId, "flujo");
+        const coberturaData = getLastMeasurement(areaId, "cobertura");
         
         const velocidadThresholds = getSensorThresholds(areaId, "velocidad");
         const temperaturaThresholds = getSensorThresholds(areaId, "temperatura");
@@ -198,13 +201,24 @@ const Dashboard = () => {
               />
               <SensorMetricCard
                 icon="Droplets"
-                title="Caudal"
+                title="Flujo"
                 value={flujoData.valor.toFixed(2)}
-                color="#f59e0b"
+                color="#ef4444"
                 minThreshold={flujoThresholds.min.toFixed(2)}
                 maxThreshold={flujoThresholds.max.toFixed(2)}
                 unit="m³/h"
               />
+              {areaId === 2 && (
+                <SensorMetricCard
+                  icon="Cloud"
+                  title="Cobertura"
+                  value={coberturaData.valor.toFixed(2)}
+                  color="#9333ea"
+                  minThreshold={getSensorThresholds(areaId, "cobertura").min.toFixed(2)}
+                  maxThreshold={getSensorThresholds(areaId, "cobertura").max.toFixed(2)}
+                  unit="%"
+                />
+              )}
             </div>
           </div>
         );

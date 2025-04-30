@@ -425,6 +425,7 @@ const SensorSettings = () => {
                                     <option value="temperatura">Temperatura</option>
                                     <option value="velocidad">Velocidad</option>
                                     <option value="caudal">Caudal</option>
+                                    <option value="cobertura">Cobertura</option>
                                   </select>
                                 </div>
                                 

@@ -84,7 +84,9 @@ const Analytics = () => {
     
     // Ordenar por timestamp (más recientes primero)
     const sortedData = [...areaMediciones].sort((a, b) => 
-      new Date(b.timestamp) - new Date(a.timestamp)
+      tipoMedicion === "coverage" 
+        ? new Date(a.timestamp) - new Date(b.timestamp)  // Orden inverso para cobertura
+        : new Date(b.timestamp) - new Date(a.timestamp)  // Orden normal para los demás
     );
     
     return sortedData.map(medicion => {
@@ -96,6 +98,8 @@ const Analytics = () => {
         valor = parseFloat(medicion.velocity || 0);
       } else if (tipoMedicion === "flow") {
         valor = parseFloat(medicion.flow || 0);
+      } else if (tipoMedicion === "coverage") {
+        valor = parseFloat(medicion.coverage || 0);
       }
       
       return {
@@ -125,7 +129,8 @@ const Analytics = () => {
     const defaultThresholds = {
       temperature: { min: 20, max: 40 },
       velocity: { min: 5, max: 30 },
-      flow: { min: 60, max: 120 }
+      flow: { min: 60, max: 120 },
+      coverage: { min: 0, max: 200 }
     };
     
     return defaultThresholds[tipoSensor] || { min: 0, max: 100 };
@@ -208,6 +213,21 @@ const Analytics = () => {
                   maxThreshold={flowThresholds.max}
                 />
               </div>
+              
+              {/* Gráfico de Cobertura (solo para área 2) */}
+              {areaId === 2 && (
+                <div>
+                  <SensorChart
+                    title={`Cobertura (${ultimaMedicion ? parseFloat(ultimaMedicion.coverage).toFixed(2) : 'N/A'} %)`}
+                    data={formatChartData(areaId, "coverage")}
+                    dataKey="valor"
+                    lineColor="#9333ea"
+                    name="Cobertura"
+                    minThreshold={getSensorThresholds(areaId, "cobertura").min}
+                    maxThreshold={getSensorThresholds(areaId, "cobertura").max}
+                  />
+                </div>
+              )}
             </div>
           </div>
         );
