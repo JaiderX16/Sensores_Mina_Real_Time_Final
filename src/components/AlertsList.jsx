@@ -30,7 +30,9 @@ const AlertsList = ({ areaId, thresholdAlerts = [] }) => {
         // Filtrar las alertas por área_id
         const alertasFiltradas = data.filter(alerta => {
           // Verificar si el sensor pertenece al área correcta
-          return alerta.sensor_id >= (areaId * 3 - 2) && alerta.sensor_id <= (areaId * 3);
+          // Incluir también el sensor de cobertura (ID 7) para el área 2
+          return (alerta.sensor_id >= (areaId * 3 - 2) && alerta.sensor_id <= (areaId * 3)) || 
+                 (areaId === 2 && alerta.sensor_id === 7);
         });
         
         console.log('Alertas filtradas para área', areaId, ':', alertasFiltradas);
@@ -61,7 +63,7 @@ const AlertsList = ({ areaId, thresholdAlerts = [] }) => {
       nivel_alerta: 'alto',
       fecha_hora: new Date().toISOString()
     }))
-  ];
+  ].sort((a, b) => new Date(b.fecha_hora) - new Date(a.fecha_hora)); // Ordenar por fecha, más recientes primero
 
   if (error) {
     return <div className="text-red-500">Error: {error}</div>;
