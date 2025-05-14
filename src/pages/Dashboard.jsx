@@ -183,7 +183,7 @@ const Dashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <SensorMetricCard
                 icon="Wind"
-                title="Viento"
+                title="Velocidad de Aire"
                 value={velocidadData.valor.toFixed(2)}
                 color="#3b82f6"
                 minThreshold={velocidadThresholds.min.toFixed(2)}
@@ -201,7 +201,7 @@ const Dashboard = () => {
               />
               <SensorMetricCard
                 icon="Droplets"
-                title="Flujo"
+                title="Caudal de Aire"
                 value={flujoData.valor.toFixed(2)}
                 color="#ef4444"
                 minThreshold={flujoThresholds.min.toFixed(2)}

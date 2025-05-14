@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, BarChart2, FolderKanban, Settings, X, User } from 'lucide-react';
+import { LayoutDashboard, BarChart2, FolderKanban, Settings, X, User, Ruler, Thermometer } from 'lucide-react';
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
   const navigate = useNavigate();
@@ -16,6 +16,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
   const navItems = [
     { path: '/', name: 'Dashboard', icon: <LayoutDashboard size={20} /> },
     { path: '/dashboard/analytics', name: 'Analytics', icon: <BarChart2 size={20} /> },
+    { path: '/dashboard/measurements', name: 'Measurements', icon: <Ruler size={20} /> },
+    { path: '/dashboard/environment', name: 'Environment Variables', icon: <Thermometer size={20} /> },
     { path: '/dashboard/notifications', name: 'Notifications', icon: <FolderKanban size={20} /> },
     { path: '/dashboard/settings', name: 'Settings', icon: <Settings size={20} /> },
   ];

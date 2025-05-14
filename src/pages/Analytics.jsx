@@ -82,11 +82,9 @@ const Analytics = () => {
     
     if (!areaMediciones || areaMediciones.length === 0) return [];
     
-    // Ordenar por timestamp (más recientes primero)
+    // Ordenar por timestamp (más antiguos primero para todos los tipos)
     const sortedData = [...areaMediciones].sort((a, b) => 
-      tipoMedicion === "coverage" 
-        ? new Date(a.timestamp) - new Date(b.timestamp)  // Orden inverso para cobertura
-        : new Date(b.timestamp) - new Date(a.timestamp)  // Orden normal para los demás
+      new Date(a.timestamp) - new Date(b.timestamp)  // Orden cronológico para todos
     );
     
     return sortedData.map(medicion => {
@@ -191,7 +189,7 @@ const Analytics = () => {
               {/* Gráfico de Velocidad */}
               <div>
                 <SensorChart
-                  title={`Velocidad del Viento (${ultimaMedicion ? parseFloat(ultimaMedicion.velocity).toFixed(2) : 'N/A'} m/s)`}
+                  title={`Velocidad de Aire (${ultimaMedicion ? parseFloat(ultimaMedicion.velocity).toFixed(2) : 'N/A'} m/min)`}
                   data={formatChartData(areaId, "velocity")}
                   dataKey="valor"
                   lineColor="#3b82f6"
@@ -204,7 +202,7 @@ const Analytics = () => {
               {/* Gráfico de Flujo */}
               <div>
                 <SensorChart
-                  title={`Flujo de Aire (${ultimaMedicion ? parseFloat(ultimaMedicion.flow).toFixed(2) : 'N/A'} m³/h)`}
+                  title={`Caudal de Aire (${ultimaMedicion ? parseFloat(ultimaMedicion.flow).toFixed(2) : 'N/A'} m³/min)`}
                   data={formatChartData(areaId, "flow")}
                   dataKey="valor"
                   lineColor="#10b981"
