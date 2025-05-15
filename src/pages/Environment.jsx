@@ -10,13 +10,17 @@ const Environment = () => {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(null);
   
-  // Nuevos estados para el cálculo de caudal de aire
+  // Estados para el cálculo de caudal de aire
   const [equipoHP, setEquipoHP] = useState(0);
   const [numPersonas, setNumPersonas] = useState(0);
   const [caudalRequerido, setCaudalRequerido] = useState(0);
+  const [caudalRequeridoBD, setCaudalRequeridoBD] = useState(0);
   const [caudalMedido, setCaudalMedido] = useState(0);
   const [cobertura, setCobertura] = useState(0);
+  const [coberturaBD, setCoberturaBD] = useState(0);
   const [loadingCaudal, setLoadingCaudal] = useState(false);
+  const [actualizandoCobertura, setActualizandoCobertura] = useState(false);
+  const [actualizandoCaudalRequerido, setActualizandoCaudalRequerido] = useState(false);
 
   const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -63,7 +67,6 @@ const Environment = () => {
 
   const createAreaData = async (id, data) => {
     try {
-      // Corregir la URL de la API para crear áreas
       const response = await fetch(`https://apisensoresmina-production.up.railway.app/api/variables-entorno/${id}`, {
         method: 'POST',
         headers: {
@@ -105,6 +108,120 @@ const Environment = () => {
       console.error('Error al actualizar datos del área:', error);
       setError(`Error al actualizar: ${error.message}`);
       return false;
+    }
+  };
+
+  // Función para obtener datos de mediciones en tiempo real
+  const fetchMedicionesData = async () => {
+    try {
+      setLoadingCaudal(true);
+      
+      // Obtener datos de mediciones en tiempo real
+      const responseMediciones = await fetch('https://apisensoresmina-production.up.railway.app/api/mediciones-tiempo-real');
+      
+      if (!responseMediciones.ok) {
+        throw new Error(`Error al obtener mediciones: ${responseMediciones.status}`);
+      }
+      
+      const dataMediciones = await responseMediciones.json();
+      
+      // Buscar los datos del área 2
+      const medicionArea2 = dataMediciones.find(item => item.area_id === 2);
+      
+      if (medicionArea2) {
+        // Actualizar el caudal medido con el valor de "flow" del área 2
+        setCaudalMedido(parseFloat(medicionArea2.flow) || 0);
+        
+        // Obtener la cobertura de la base de datos
+        setCoberturaBD(parseFloat(medicionArea2.coverage) || 0);
+      }
+      
+      // Obtener datos de variables de entorno
+      const responseVariables = await fetch('https://apisensoresmina-production.up.railway.app/api/variables-entorno');
+      
+      if (!responseVariables.ok) {
+        throw new Error(`Error al obtener variables de entorno: ${responseVariables.status}`);
+      }
+      
+      const dataVariables = await responseVariables.json();
+      
+      // Buscar los datos del área 2
+      const variablesArea2 = dataVariables.find(item => item.area_id === 2);
+      
+      if (variablesArea2) {
+        // Actualizar el caudal requerido de la BD
+        setCaudalRequeridoBD(parseFloat(variablesArea2.caudal_requerido) || 0);
+        
+        // Si ya tenemos un caudal medido, actualizar la cobertura calculada
+        if (caudalMedido > 0 && variablesArea2.caudal_requerido > 0) {
+          const coberturaCalculada = (caudalMedido / parseFloat(variablesArea2.caudal_requerido)) * 100;
+          setCobertura(coberturaCalculada);
+        }
+      }
+      
+    } catch (error) {
+      setError(`Error al cargar datos: ${error.message}`);
+    } finally {
+      setLoadingCaudal(false);
+    }
+  };
+
+  // Nueva función para actualizar el caudal requerido en la API
+  const actualizarCaudalRequerido = async () => {
+    try {
+      setActualizandoCaudalRequerido(true);
+      
+      // Obtener los datos actuales del área 2
+      const response = await fetch('https://apisensoresmina-production.up.railway.app/api/variables-entorno');
+      
+      if (!response.ok) {
+        throw new Error(`Error al obtener variables de entorno: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      const variablesArea2 = data.find(item => item.area_id === 2);
+      
+      if (!variablesArea2) {
+        throw new Error("No se encontraron datos para el Área 2");
+      }
+      
+      // Preparar los datos para actualizar
+      const datosActualizados = {
+        ...variablesArea2,
+        caudal_requerido: caudalRequerido.toString()  // Convertir a string para mantener consistencia con la API
+      };
+      
+      // Actualizar los datos en la API
+      const updateResponse = await fetch(`https://apisensoresmina-production.up.railway.app/api/variables-entorno/${variablesArea2.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(datosActualizados)
+      });
+      
+      if (!updateResponse.ok) {
+        const errorMessage = await updateResponse.text();
+        throw new Error(`No se pudo actualizar el caudal requerido: ${errorMessage}`);
+      }
+      
+      // Actualizar el valor de caudal requerido en la BD
+      setCaudalRequeridoBD(caudalRequerido);
+      
+      // Recalcular la cobertura
+      if (caudalRequerido > 0) {
+        const coberturaCalculada = (caudalMedido / caudalRequerido) * 100;
+        setCobertura(coberturaCalculada);
+      }
+      
+      // Mostrar mensaje de éxito
+      setError(null);
+      
+    } catch (error) {
+      console.error('Error al actualizar caudal requerido:', error);
+      setError(`Error al actualizar caudal requerido: ${error.message}`);
+    } finally {
+      setActualizandoCaudalRequerido(false);
     }
   };
 
@@ -163,54 +280,6 @@ const Environment = () => {
     loadAreas();
   }, []);
 
-  const handleInputChange = (id, field, value) => {
-    setAreas(areas.map(area => {
-      if (area.id === id) {
-        const updatedArea = {
-          ...area,
-          [field]: parseFloat(value) || 0
-        };
-        // Ya no actualizamos result aquí, solo lo mantenemos como estaba
-        return updatedArea;
-      }
-      return area;
-    }));
-  };
-
-  // Nueva función para obtener datos de mediciones en tiempo real
-  const fetchMedicionesData = async () => {
-    try {
-      setLoadingCaudal(true);
-      const response = await fetch('https://apisensoresmina-production.up.railway.app/api/mediciones-tiempo-real');
-      
-      if (!response.ok) {
-        throw new Error(`Error al obtener mediciones: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      
-      // Buscar los datos del área 2 (según lo indicado)
-      const medicionArea2 = data.find(item => item.area_id === 2);
-      
-      if (medicionArea2) {
-        // Actualizar el caudal medido con el valor de "flow" del área 2
-        setCaudalMedido(parseFloat(medicionArea2.flow) || 0);
-        
-        // Si ya tenemos un caudal requerido calculado, actualizar la cobertura
-        if (caudalRequerido > 0) {
-          const coberturaCalculada = (parseFloat(medicionArea2.flow) / caudalRequerido) * 100;
-          setCobertura(coberturaCalculada);
-        }
-      } else {
-        setError("No se encontraron datos para el Área 2");
-      }
-    } catch (error) {
-      setError(`Error al cargar mediciones: ${error.message}`);
-    } finally {
-      setLoadingCaudal(false);
-    }
-  };
-
   // Cargar los datos de mediciones al iniciar y configurar actualización periódica
   useEffect(() => {
     // Cargar datos iniciales
@@ -224,6 +293,19 @@ const Environment = () => {
     // Limpiar intervalo cuando el componente se desmonte
     return () => clearInterval(intervalo);
   }, []);
+
+  const handleInputChange = (id, field, value) => {
+    setAreas(areas.map(area => {
+      if (area.id === id) {
+        const updatedArea = {
+          ...area,
+          [field]: parseFloat(value) || 0
+        };
+        return updatedArea;
+      }
+      return area;
+    }));
+  };
 
   // Nueva función para calcular el caudal de aire requerido
   const calcularCaudalRequerido = () => {
@@ -239,23 +321,13 @@ const Environment = () => {
     }
   };
 
-  // Nueva función para calcular la cobertura
-  const calcularCobertura = (caudal) => {
-    if (caudal > 0) {
-      const coberturaCalculada = (parseFloat(caudalMedido) / caudal) * 100;
-      setCobertura(coberturaCalculada);
-    } else {
-      setCobertura(0);
-    }
-  };
-
   // Manejador para cambios en los inputs de caudal
   const handleCaudalInputChange = (e, setter) => {
     const value = e.target.value;
     setter(parseFloat(value) || 0);
   };
 
-  // Función handleUpdate única y corregida
+  // Función para actualizar áreas
   const handleUpdate = async (area) => {
     setError(null);
     setUpdating(area.id);
@@ -316,7 +388,7 @@ const Environment = () => {
         </div>
       )}
 
-      {/* Nueva sección para cálculo de caudal de aire */}
+      {/* Sección para cálculo de caudal de aire */}
       <div className="mb-10 bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-lg overflow-hidden">
         <div className="bg-gradient-to-r from-blue-900/50 to-purple-900/50 p-4 border-b border-gray-700 flex justify-between items-center">
           <h2 className="text-2xl font-bold text-white">Cálculo de Caudal de Aire</h2>
@@ -384,9 +456,19 @@ const Environment = () => {
             <button
               onClick={calcularCaudalRequerido}
               className="flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-500 text-white font-medium rounded-lg transition-all"
+              disabled={loadingCaudal}
             >
-              <Calculator size={18} />
-              <span>Calcular</span>
+              {loadingCaudal ? (
+                <>
+                  <Loader2 size={18} className="animate-spin" />
+                  <span>Calculando...</span>
+                </>
+              ) : (
+                <>
+                  <Calculator size={18} />
+                  <span>Calcular</span>
+                </>
+              )}
             </button>
           </div>
           
@@ -394,7 +476,7 @@ const Environment = () => {
             <div className="bg-gray-700/50 rounded-lg p-5">
               <h3 className="text-lg font-medium text-gray-300 mb-3 flex items-center">
                 <Wind size={20} className="mr-2 text-blue-400" />
-                Caudal de Aire Requerido
+                Caudal de Aire Requerido 
               </h3>
               <p className="text-3xl font-bold text-white">
                 {caudalRequerido.toFixed(2)} <span className="text-lg text-gray-400">m³/min</span>
@@ -402,6 +484,42 @@ const Environment = () => {
               <p className="text-sm text-gray-400 mt-2">
                 Fórmula: 3 × HP + 6 × Personas = {caudalRequerido.toFixed(2)} m³/min
               </p>
+              {caudalRequeridoBD !== 0 && (
+                <p className="text-sm text-gray-400 mt-2">
+                  Valor en BD: <span className="font-medium text-gray-300">{caudalRequeridoBD.toFixed(2)} m³/min</span>
+                  <a 
+                    href="https://apisensoresmina-production.up.railway.app/api/variables-entorno" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="ml-2 text-blue-400 hover:text-blue-300 text-xs underline"
+                  >
+                    (Ver API)
+                  </a>
+                </p>
+              )}
+              <div className="mt-3">
+                <button
+                  onClick={actualizarCaudalRequerido}
+                  className={`w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg font-medium transition-all ${
+                    actualizandoCaudalRequerido 
+                      ? 'bg-blue-700 text-blue-200 cursor-wait' 
+                      : 'bg-blue-600 hover:bg-blue-500 text-white'
+                  }`}
+                  disabled={actualizandoCaudalRequerido || loadingCaudal || caudalRequerido <= 0}
+                >
+                  {actualizandoCaudalRequerido ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      <span>Guardando...</span>
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw size={16} />
+                      <span>Guardar</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
             
             <div className={`bg-gray-700/50 rounded-lg p-5 ${cobertura < 100 ? 'border-2 border-red-500' : ''}`}>
@@ -421,6 +539,34 @@ const Environment = () => {
               <p className="text-sm text-gray-400 mt-2">
                 Fórmula: (Caudal Medido / Caudal Requerido) × 100%
               </p>
+              {coberturaBD !== 0 && (
+                <p className="text-sm text-gray-400 mt-2">
+                  Cobertura en BD: <span className="font-medium text-gray-300">{coberturaBD.toFixed(2)}%</span>
+                </p>
+              )}
+              <div className="mt-3">
+                <button
+                  onClick={() => actualizarCobertura()}
+                  className={`w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg font-medium transition-all ${
+                    actualizandoCobertura 
+                      ? 'bg-blue-700 text-blue-200 cursor-wait' 
+                      : 'bg-blue-600 hover:bg-blue-500 text-white'
+                  }`}
+                  disabled={actualizandoCobertura || loadingCaudal || cobertura <= 0}
+                >
+                  {actualizandoCobertura ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      <span>Guardando...</span>
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw size={16} />
+                      <span>Guardar</span>
+                    </>
+                  )}
+                </button>
+              </div>
               {cobertura < 100 && (
                 <div className="mt-3 p-2 bg-red-900/30 border border-red-800 rounded text-red-300 text-sm">
                   <AlertTriangle size={16} className="inline-block mr-1" />
