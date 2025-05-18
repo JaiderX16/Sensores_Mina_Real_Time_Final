@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { format } from 'date-fns';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, WifiOff } from 'lucide-react';
 
-const AlertsList = ({ areaId, thresholdAlerts = [] }) => {
+const AlertsList = ({ areaId, thresholdAlerts = [], inactivityAlerts = [] }) => {
   const [alertas, setAlertas] = useState([]);
   const [error, setError] = useState(null);
 
@@ -47,7 +47,7 @@ const AlertsList = ({ areaId, thresholdAlerts = [] }) => {
     fetchAlertas();
   }, [areaId]);
 
-  // Combinar alertas de la API con alertas de umbral
+  // Combinar alertas de la API con alertas de umbral y alertas de inactividad
   const formattedAlerts = [
     ...alertas.map(alerta => ({
       id_alerta: alerta.id,
@@ -55,14 +55,26 @@ const AlertsList = ({ areaId, thresholdAlerts = [] }) => {
       nivel_alerta: alerta.estado === 'activa' ? 'alto' : 'bajo',
       fecha_hora: alerta.marca_temporal,
       sensor_id: alerta.sensor_id,
-      estado: alerta.estado
+      estado: alerta.estado,
+      tipo: 'api'
     })),
     ...thresholdAlerts.map((alert, index) => ({
       id_alerta: `threshold-${index}`,
       descripcion: alert,
       nivel_alerta: 'alto',
-      fecha_hora: new Date().toISOString()
-    }))
+      fecha_hora: new Date().toISOString(),
+      tipo: 'threshold'
+    })),
+    ...inactivityAlerts
+      .filter(alert => alert.areaId === areaId || areaId === 0) // Filtrar por área o mostrar todas si areaId es 0
+      .map((alert, index) => ({
+        id_alerta: `inactivity-${index}`,
+        descripcion: alert.mensaje,
+        nivel_alerta: 'alto',
+        fecha_hora: alert.timestamp || new Date().toISOString(),
+        tipo: 'inactivity',
+        area: alert.area
+      }))
   ].sort((a, b) => new Date(b.fecha_hora) - new Date(a.fecha_hora)); // Ordenar por fecha, más recientes primero
 
   if (error) {
@@ -78,19 +90,30 @@ const AlertsList = ({ areaId, thresholdAlerts = [] }) => {
             <div
               key={alert.id_alerta}
               className={`p-4 flex items-center gap-3 ${
-                typeof alert.id_alerta === 'string' && alert.id_alerta.startsWith('threshold-')
-                  ? 'text-red-400'
-                  : alert.nivel_alerta === 'alto'
+                alert.tipo === 'inactivity' 
+                  ? 'text-orange-400'
+                  : typeof alert.id_alerta === 'string' && alert.id_alerta.startsWith('threshold-')
                     ? 'text-red-400'
-                    : alert.nivel_alerta === 'medio'
-                      ? 'text-yellow-400'
-                      : 'text-blue-400'
+                    : alert.nivel_alerta === 'alto'
+                      ? 'text-red-400'
+                      : alert.nivel_alerta === 'medio'
+                        ? 'text-yellow-400'
+                        : 'text-blue-400'
               }`}
             >
-              <AlertCircle size={20} />
+              {alert.tipo === 'inactivity' ? (
+                <WifiOff size={20} />
+              ) : (
+                <AlertCircle size={20} />
+              )}
               <div className="flex flex-col">
                 <span className="font-medium">{alert.descripcion}</span>
-                {!String(alert.id_alerta).startsWith('threshold-') && (
+                {alert.tipo === 'inactivity' && (
+                  <span className="text-sm text-gray-400">
+                    Área: {alert.area}
+                  </span>
+                )}
+                {alert.tipo === 'api' && (
                   <>
                     <span className="text-sm text-gray-400">
                       Sensor ID: {alert.sensor_id}
