@@ -51,7 +51,7 @@ const Dashboard = () => {
         setSensores(sensoresData);
 
         // Obtener mediciones usando la nueva URL
-        const medicionesResponse = await fetch('https://apisensoresmina-production.up.railway.app/api/mediciones', {
+        const medicionesResponse = await fetch('https://apisensoresmina-production.up.railway.app/api/mediciones-tiempo-real', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json'
