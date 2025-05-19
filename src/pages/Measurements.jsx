@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Clock, Wind, Thermometer, Activity, Map, Filter } from 'lucide-react';
+import { JsonToExcel } from '../components/JsonToExcel';
 
 const locations = [
   'Bocamina Nv. 4490',
@@ -106,6 +107,23 @@ const Measurements = () => {
     filterMeasurements();
   }, [startDate, endDate, selectedLocation, measurements]);
 
+  // Función para preparar los datos para exportar a Excel
+  const prepareDataForExport = () => {
+    return filteredMeasurements.map(measurement => ({
+      Fecha: measurement.date,
+      Hora: measurement.time,
+      Ubicación: measurement.location,
+      Temperatura: measurement.allValues?.temperature,
+      'Temperatura (°C)': `${measurement.allValues?.temperature} °C`,
+      Velocidad: measurement.allValues?.velocity,
+      'Velocidad (m/s)': `${measurement.allValues?.velocity} m/s`,
+      Caudal: measurement.allValues?.flow,
+      'Caudal (m³/s)': `${measurement.allValues?.flow} m³/s`,
+      Cobertura: measurement.allValues?.coverage,
+      'Cobertura (%)': `${measurement.allValues?.coverage} %`
+    }));
+  };
+
   return (
     <div className="animate-fade-in">
       <div className="mb-6">
@@ -163,7 +181,7 @@ const Measurements = () => {
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
-        <div className="p-6 border-b border-gray-100 dark:border-gray-700">
+        <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
           <h3 className="font-medium text-gray-800 dark:text-gray-200">
             Registro de Mediciones
             {loading ? (
@@ -174,6 +192,14 @@ const Measurements = () => {
               </span>
             )}
           </h3>
+          
+          {/* Componente de exportación a Excel */}
+          <JsonToExcel
+            data={prepareDataForExport()}
+            fileName={`Mediciones_${new Date().toISOString().split('T')[0]}`}
+            sheetName="Mediciones"
+            buttonText="Exportar a Excel"
+          />
         </div>
 
         {error && (
