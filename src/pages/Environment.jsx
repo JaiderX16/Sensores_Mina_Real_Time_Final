@@ -3,8 +3,8 @@ import { Calculator, Loader2, Wind, Users, AlertTriangle, RefreshCw } from 'luci
 
 const Environment = () => {
   const [areas, setAreas] = useState([
-    { id: 1, name: 'Área 1', height: 0, width: 0, correction: 0, result: 0 },
-    { id: 2, name: 'Área 2', height: 0, width: 0, correction: 0, result: 0 }
+    { id: 1, name: 'Bocamina Nv. 4490', height: 0, width: 0, correction: 0, result: 0 },
+    { id: 2, name: 'Rampa 4490-2W', height: 0, width: 0, correction: 0, result: 0 }
   ]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -327,7 +327,21 @@ const Environment = () => {
     setter(parseFloat(value) || 0);
   };
 
-  // Función para actualizar áreas
+  // Función para solo calcular el área sin actualizar la BD
+  const handleCalculate = (area) => {
+    const resultado = area.height * area.width * area.correction;
+    setAreas(areas.map(a => {
+      if (a.id === area.id) {
+        return {
+          ...a,
+          calculatedResult: resultado // Guardamos el resultado calculado en una propiedad separada
+        };
+      }
+      return a;
+    }));
+  };
+  
+  // Función para actualizar áreas en la BD (la función existente)
   const handleUpdate = async (area) => {
     setError(null);
     setUpdating(area.id);
@@ -335,7 +349,7 @@ const Environment = () => {
       height: area.height,
       width: area.width,
       correction: area.correction,
-      superficie_area: area.height * area.width * area.correction
+      superficie_area: area.calculatedResult || (area.height * area.width * area.correction)
     };
     
     try {
@@ -352,7 +366,8 @@ const Environment = () => {
                   height: parseFloat(newData.height) || 0,
                   width: parseFloat(newData.width) || 0,
                   correction: parseFloat(newData.correction) || 0,
-                  result: superficie
+                  result: superficie,
+                  calculatedResult: superficie // Sincronizamos el resultado calculado con el de la BD
                 };
               }
               return a;
@@ -389,45 +404,49 @@ const Environment = () => {
       )}
 
       {/* Sección para cálculo de caudal de aire */}
-      <div className="mb-10 bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-lg overflow-hidden">
-        <div className="bg-gradient-to-r from-blue-900/50 to-purple-900/50 p-4 border-b border-gray-700 flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-white">Cálculo de Caudal de Aire</h2>
+      <div className="mb-10 bg-gray-800 rounded-lg shadow-md border border-gray-700 overflow-hidden">
+        <div className="bg-gray-750 p-5 border-b border-gray-700">
+          <h3 className="text-lg font-medium text-gray-200">Cálculo de Caudal de Aire</h3>
           <button 
             onClick={fetchMedicionesData}
-            className="flex items-center gap-1 text-blue-300 hover:text-blue-100 transition-colors"
+            className="flex items-center gap-2 text-blue-300 hover:text-blue-100 transition-colors"
             disabled={loadingCaudal}
           >
             <RefreshCw size={16} className={loadingCaudal ? "animate-spin" : ""} />
-            <span className="text-sm">Actualizar datos</span>
+            <span className="text-sm">Actualizar</span>
           </button>
         </div>
         
         <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-base font-medium text-gray-300 mb-2">
                 Número de HP de Equipo (X)
               </label>
               <div className="relative">
                 <input
+                  type="number"
+                  step="0.01"
                   value={equipoHP}
                   onChange={(e) => handleCaudalInputChange(e, setEquipoHP)}
-                  className="w-full p-3 pl-4 bg-gray-700/80 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 text-base"
                   placeholder="Ingrese HP"
                 />
-                <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">HP</span>
+                <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-base">HP</span>
               </div>
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-base font-medium text-gray-300 mb-2">
                 Número de Personas (Y)
               </label>
               <div className="relative">
                 <input
+                  type="number"
+                  step="0.01"
                   value={numPersonas}
                   onChange={(e) => handleCaudalInputChange(e, setNumPersonas)}
-                  className="w-full p-3 pl-4 bg-gray-700/80 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 text-base"
                   placeholder="Ingrese cantidad"
                 />
                 <Users size={18} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -435,13 +454,13 @@ const Environment = () => {
             </div>
           </div>
           
-          <div className="bg-gray-700/30 rounded-lg p-4 mb-6">
+          <div className="bg-gray-700 rounded-lg p-4 mb-5">
             <div className="flex justify-between items-center">
               <div className="flex items-center">
-                <Wind size={20} className="mr-2 text-blue-400" />
-                <span className="text-gray-300 font-medium">Caudal Medido (Sensor):</span>
+                <Wind size={18} className="mr-2 text-blue-400" />
+                <span className="text-base text-gray-300 font-medium">Caudal Medido (Sensor):</span>
               </div>
-              <div className="text-xl font-bold text-white">
+              <div className="text-lg font-bold text-gray-200">
                 {loadingCaudal ? (
                   <Loader2 size={18} className="animate-spin ml-2" />
                 ) : (
@@ -449,13 +468,13 @@ const Environment = () => {
                 )}
               </div>
             </div>
-            <p className="text-xs text-gray-500 mt-1">Datos obtenidos del Área 2 en tiempo real</p>
+            <p className="text-sm text-gray-500 mt-1">Datos obtenidos de Rampa 4490-2W en tiempo real</p>
           </div>
           
-          <div className="flex justify-center mb-6">
+          <div className="flex justify-center mb-5">
             <button
               onClick={calcularCaudalRequerido}
-              className="flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-500 text-white font-medium rounded-lg transition-all"
+              className="flex items-center gap-2 px-5 py-3 bg-blue-600 hover:bg-blue-500 text-white text-base font-medium rounded-lg transition-colors"
               disabled={loadingCaudal}
             >
               {loadingCaudal ? (
@@ -472,14 +491,14 @@ const Environment = () => {
             </button>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-gray-700/50 rounded-lg p-5">
-              <h3 className="text-lg font-medium text-gray-300 mb-3 flex items-center">
-                <Wind size={20} className="mr-2 text-blue-400" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="bg-gray-700 rounded-lg p-5">
+              <h3 className="text-base font-medium text-gray-300 mb-3 flex items-center">
+                <Wind size={18} className="mr-2 text-blue-400" />
                 Caudal de Aire Requerido 
               </h3>
-              <p className="text-3xl font-bold text-white">
-                {caudalRequerido.toFixed(2)} <span className="text-lg text-gray-400">m³/min</span>
+              <p className="text-2xl font-bold text-gray-200">
+                {caudalRequerido.toFixed(2)} <span className="text-base text-gray-400">m³/min</span>
               </p>
               <p className="text-sm text-gray-400 mt-2">
                 Fórmula: 3 × HP + 6 × Personas = {caudalRequerido.toFixed(2)} m³/min
@@ -500,7 +519,7 @@ const Environment = () => {
               <div className="mt-3">
                 <button
                   onClick={actualizarCaudalRequerido}
-                  className={`w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg font-medium transition-all ${
+                  className={`w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                     actualizandoCaudalRequerido 
                       ? 'bg-blue-700 text-blue-200 cursor-wait' 
                       : 'bg-blue-600 hover:bg-blue-500 text-white'
@@ -522,10 +541,10 @@ const Environment = () => {
               </div>
             </div>
             
-            <div className={`bg-gray-700/50 rounded-lg p-5 ${cobertura < 100 ? 'border-2 border-red-500' : ''}`}>
-              <h3 className="text-lg font-medium text-gray-300 mb-3 flex items-center">
+            <div className={`bg-gray-700 rounded-lg p-5 ${cobertura < 100 ? 'border border-red-500' : ''}`}>
+              <h3 className="text-base font-medium text-gray-300 mb-3 flex items-center">
                 {cobertura < 100 ? (
-                  <AlertTriangle size={20} className="mr-2 text-red-500" />
+                  <AlertTriangle size={18} className="mr-2 text-red-500" />
                 ) : (
                   <div className="mr-2 w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
                     <span className="text-xs text-white">✓</span>
@@ -533,151 +552,131 @@ const Environment = () => {
                 )}
                 Cobertura
               </h3>
-              <p className={`text-3xl font-bold ${cobertura < 100 ? 'text-red-400' : 'text-green-400'}`}>
+              <p className={`text-2xl font-bold ${cobertura < 100 ? 'text-red-500' : 'text-green-500'}`}>
                 {cobertura.toFixed(2)}%
               </p>
               <p className="text-sm text-gray-400 mt-2">
-                Fórmula: (Caudal Medido / Caudal Requerido) × 100%
+                Caudal Medido / Caudal Requerido × 100
               </p>
-              {coberturaBD !== 0 && (
-                <p className="text-sm text-gray-400 mt-2">
-                  Cobertura en BD: <span className="font-medium text-gray-300">{coberturaBD.toFixed(2)}%</span>
-                </p>
-              )}
-              <div className="mt-3">
-                <button
-                  onClick={() => actualizarCobertura()}
-                  className={`w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg font-medium transition-all ${
-                    actualizandoCobertura 
-                      ? 'bg-blue-700 text-blue-200 cursor-wait' 
-                      : 'bg-blue-600 hover:bg-blue-500 text-white'
-                  }`}
-                  disabled={actualizandoCobertura || loadingCaudal || cobertura <= 0}
-                >
-                  {actualizandoCobertura ? (
-                    <>
-                      <Loader2 size={16} className="animate-spin" />
-                      <span>Guardando...</span>
-                    </>
-                  ) : (
-                    <>
-                      <RefreshCw size={16} />
-                      <span>Guardar</span>
-                    </>
-                  )}
-                </button>
+              <div className="mt-3 h-3 bg-gray-600 rounded-full overflow-hidden">
+                <div 
+                  className={`h-full ${cobertura >= 100 ? 'bg-green-500' : 'bg-red-500'}`}
+                  style={{ width: `${Math.min(cobertura, 100)}%` }}
+                ></div>
               </div>
-              {cobertura < 100 && (
-                <div className="mt-3 p-2 bg-red-900/30 border border-red-800 rounded text-red-300 text-sm">
-                  <AlertTriangle size={16} className="inline-block mr-1" />
-                  ¡Alerta! La cobertura es menor al 100% requerido.
-                </div>
-              )}
+              <p className="text-sm text-gray-400 mt-3">
+                {cobertura < 100 
+                  ? "La cobertura actual es insuficiente para las necesidades operativas."
+                  : "La cobertura actual cumple con los requisitos mínimos de ventilación."}
+              </p>
             </div>
           </div>
         </div>
       </div>
 
-      {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="flex flex-col items-center">
-            <Loader2 size={40} className="animate-spin text-blue-500 mb-4" />
-            <p className="text-gray-500 dark:text-gray-400">Cargando datos...</p>
-          </div>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {areas.map(area => (
-            <div key={area.id} className="bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-lg overflow-hidden transition-all hover:shadow-xl">
-              <div className="bg-gradient-to-r from-blue-900/50 to-purple-900/50 p-4 border-b border-gray-700">
-                <h2 className="text-2xl font-bold text-white">{area.name}</h2>
-              </div>
-              
-              <div className="p-6 space-y-5">
+      {/* Sección para cálculo de áreas */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        {areas.map((area) => (
+          <div key={area.id} className="bg-gray-800 rounded-lg shadow-md border border-gray-700 overflow-hidden">
+            <div className="bg-gray-750 p-4 border-b border-gray-700">
+              <h3 className="text-base font-medium text-gray-200">{area.name}</h3>
+              <p className="text-sm text-gray-400 mt-1">Cálculo de área de sección</p>
+            </div>
+            
+            <div className="p-5">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-base font-medium text-gray-300 mb-2">
                     Altura (m)
                   </label>
-                  <div className="relative">
-                    <input
-                      value={area.height}
-                      onChange={(e) => handleInputChange(area.id, 'height', e.target.value)}
-                      className="w-full p-3 pl-4 bg-gray-700/80 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                      placeholder="Ingrese la altura"
-                    />
-                    <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">m</span>
-                  </div>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Ancho (m)
-                  </label>
-                  <div className="relative">
-                    <input
-                      value={area.width}
-                      onChange={(e) => handleInputChange(area.id, 'width', e.target.value)}
-                      className="w-full p-3 pl-4 bg-gray-700/80 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                      placeholder="Ingrese el ancho"
-                    />
-                    <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">m</span>
-                  </div>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Factor de Corrección
-                  </label>
                   <input
-                    value={area.correction}
-                    onChange={(e) => handleInputChange(area.id, 'correction', e.target.value)}
-                    className="w-full p-3 bg-gray-700/80 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                    placeholder="Ingrese el factor de corrección"
+                    type="number"
                     step="0.01"
+                    value={area.height}
+                    onChange={(e) => handleInputChange(area.id, 'height', e.target.value)}
+                    className="w-full p-3 border border-gray-600 rounded-lg bg-gray-700 text-gray-200"
+                    min="0"
                   />
                 </div>
+                <div>
+                  <label className="block text-base font-medium text-gray-300 mb-2">
+                    Ancho (m)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={area.width}
+                    onChange={(e) => handleInputChange(area.id, 'width', e.target.value)}
+                    className="w-full p-3 border border-gray-600 rounded-lg bg-gray-700 text-gray-200"
+                    min="0"
+                  />
+                </div>
+                {/* // En la sección de renderizado de las áreas */}
+                <div>
+                  <label className="block text-base font-medium text-gray-300 mb-2">
+                    F. Corrección (%)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={area.correction * 100} // Multiplicar por 100 para mostrar como porcentaje
+                    onChange={(e) => handleInputChange(area.id, 'correction', e.target.value / 100)} // Dividir por 100 al guardar
+                    className="w-full p-3 border border-gray-600 rounded-lg bg-gray-700 text-gray-200 text-base"
+                    min="0"
+                    max="100" // Cambiar el máximo a 100 para porcentaje
+                  />
+                </div>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-base font-medium text-gray-300">Resultado:</span>
+                  <span className="ml-2 text-xl font-semibold text-gray-200">
+                    {(area.calculatedResult || (area.height * area.width * area.correction)).toFixed(2)} m²
+                  </span>
+                  <p className="text-sm text-gray-400 mt-1">
+                    Valor en BD: <span className="font-medium text-gray-300">{area.result.toFixed(2)} m²</span>
+                  </p>
+                </div>
                 
-                <div className="border-t border-gray-700 pt-5 mt-5">
-                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <div>
-                      <p className="text-gray-400 text-sm mb-1">Superficie Calculada:</p>
-                      <div className="flex flex-col">
-                        <p className="text-3xl font-bold text-white bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
-                          {(area.height * area.width * area.correction).toFixed(2)} m<sup>2</sup>
-                        </p>
-                        <p className="text-md text-gray-400 mt-1">
-                          Valor en BD: <span className="font-medium text-gray-300">{typeof area.result === 'number' ? area.result.toFixed(2) : '0.00'} m<sup>2</sup></span>
-                        </p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => handleUpdate(area)}
-                      className={`flex items-center gap-2 px-5 py-3 rounded-lg font-medium transition-all ${
-                        updating === area.id 
-                          ? 'bg-blue-700 text-blue-200 cursor-wait' 
-                          : 'bg-blue-600 hover:bg-blue-500 text-white'
-                      }`}
-                      disabled={updating === area.id}
-                    >
-                      {updating === area.id ? (
-                        <>
-                          <Loader2 size={18} className="animate-spin" />
-                          <span>Actualizando...</span>
-                        </>
-                      ) : (
-                        <>
-                          <Calculator size={18} />
-                          <span>Actualizar</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
+                <div className="flex flex-wrap gap-3 sm:gap-4 justify-end ml-0.5">
+                  <button 
+                    onClick={() => handleCalculate(area)} 
+                    className="flex-1 sm:flex-none px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-500 transition-colors text-base font-medium shadow-sm hover:shadow-md"
+                  > 
+                    <span className="flex items-center justify-center"> 
+                      <Calculator size={20} className="mr-2" /> 
+                      <span>Calcular</span> 
+                    </span> 
+                  </button> 
+                  
+                  <button 
+                    onClick={() => handleUpdate(area)} 
+                    disabled={updating === area.id} 
+                    className={`flex-1 sm:flex-none px-4 py-2.5 rounded-lg text-base font-medium shadow-sm hover:shadow-md transition-all ${
+                      updating === area.id 
+                        ? 'bg-blue-700 text-blue-100 cursor-wait' 
+                        : 'bg-blue-600 hover:bg-blue-500 text-white'
+                    }`}
+                  > 
+                    {updating === area.id ? ( 
+                      <span className="flex items-center justify-center"> 
+                        <Loader2 size={20} className="animate-spin mr-2" /> 
+                        <span>Actualizando...</span> 
+                      </span> 
+                    ) : ( 
+                      <span className="flex items-center justify-center"> 
+                        <RefreshCw size={20} className="mr-2" /> 
+                        <span>Actualizar</span> 
+                      </span> 
+                    )} 
+                  </button> 
                 </div>
               </div>
             </div>
-          ))}
-        </div>
-      )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
