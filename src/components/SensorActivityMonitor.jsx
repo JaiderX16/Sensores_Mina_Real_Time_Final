@@ -37,7 +37,6 @@ const SensorActivityMonitor = ({ onInactiveAlert, areas }) => {
   const [sensorData, setSensorData] = useState(initialSensorState);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showDetails, setShowDetails] = useState(false);
   
   // Nombres de áreas
   const areaNames = useMemo(() => ({
@@ -350,35 +349,6 @@ const SensorActivityMonitor = ({ onInactiveAlert, areas }) => {
           data={sensorData.area2} 
           areaName={areaNames.area2} 
         />
-      </div>
-      
-      {/* Botón flotante de estado y panel de detalles */}
-      <div className="pointer-events-none">
-        <div className="fixed bottom-4 right-4 z-40 pointer-events-auto">
-          <button
-            onClick={() => setShowDetails(!showDetails)}
-            className={`flex items-center gap-2 px-3 py-2 rounded-lg shadow-lg transition-colors ${
-              hasAlarmCondition() 
-                ? 'bg-red-600 hover:bg-red-700 text-white' 
-                : 'bg-green-600 hover:bg-green-700 text-white'
-            }`}
-          >
-            {hasAlarmCondition() ? (
-              <AlertTriangle size={20} />
-            ) : (
-              <CheckCircle size={20} />
-            )}
-            <span>Estado del Sistema</span>
-          </button>
-        </div>
-    
-        {showDetails && (
-          <div className="fixed bottom-16 right-4 w-96 bg-gray-800 rounded-lg shadow-xl p-4 border border-gray-700 pointer-events-auto">
-            {/* Aquí iría el contenido detallado del panel */}
-            <h3 className="text-lg font-medium text-white mb-3">Detalles del Sistema</h3>
-            {/* Contenido adicional según necesidades */}
-          </div>
-        )}
       </div>
     </div>
   );
