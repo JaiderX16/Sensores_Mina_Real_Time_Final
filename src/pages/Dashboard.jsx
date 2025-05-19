@@ -184,7 +184,7 @@ const Dashboard = () => {
       <div className="text-center mb-6">
         <div className="flex justify-center mb-4">
           <img 
-            src="/src/img/Osinergmin.png" 
+            src="/Osinergmin.png" 
             alt="Logo Osinergmin" 
             className="h-20 object-contain"
           />
