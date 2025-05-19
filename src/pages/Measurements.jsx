@@ -39,6 +39,7 @@ const Measurements = () => {
           const date = new Date(item.timestamp);
           return {
             id: item.id,
+            timestamp: date,
             date: date.toISOString().split('T')[0],
             time: date.toTimeString().split(':').slice(0, 2).join(':'),
             location: areaIdToLocation[item.area_id] || `Área ${item.area_id}`,
@@ -51,8 +52,11 @@ const Measurements = () => {
           };
         });
         
-        setMeasurements(formattedData);
-        setFilteredMeasurements(formattedData);
+        // Ordenar los datos del más reciente al más antiguo
+        const sortedData = formattedData.sort((a, b) => b.timestamp - a.timestamp);
+        
+        setMeasurements(sortedData);
+        setFilteredMeasurements(sortedData);
         setError(null);
       } catch (err) {
         console.error('Error al cargar mediciones:', err);
@@ -93,6 +97,7 @@ const Measurements = () => {
       );
     }
     
+    // Mantener el orden del más reciente al más antiguo
     setFilteredMeasurements(filtered);
   };
 
