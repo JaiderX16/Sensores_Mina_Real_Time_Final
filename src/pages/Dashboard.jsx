@@ -234,7 +234,7 @@ const Dashboard = () => {
                     color="#3b82f6"
                     minThreshold={velocidadThresholds.min.toFixed(2)}
                     maxThreshold={velocidadThresholds.max.toFixed(2)}
-                    unit="m/s"
+                    unit="m/min"
                   />
                   <SensorMetricCard
                     icon="Thermometer"
@@ -297,7 +297,7 @@ const Dashboard = () => {
                     color="#3b82f6"
                     minThreshold={velocidadThresholds.min.toFixed(2)}
                     maxThreshold={velocidadThresholds.max.toFixed(2)}
-                    unit="m/s"
+                    unit="m/min"
                   />
                   <SensorMetricCard
                     icon="Thermometer"

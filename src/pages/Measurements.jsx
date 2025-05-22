@@ -22,6 +22,9 @@ const Measurements = () => {
   // Estados para el filtrado por fechas
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  // Estados para el filtrado por horas
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
   const [filteredMeasurements, setFilteredMeasurements] = useState([]);
 
   // Función para cargar los datos de la API
@@ -70,7 +73,7 @@ const Measurements = () => {
     fetchMeasurements();
   }, []);
 
-  // Función para filtrar mediciones por fecha y ubicación
+  // Función para filtrar mediciones por fecha, hora y ubicación
   const filterMeasurements = () => {
     let filtered = [...measurements];
     
@@ -91,6 +94,23 @@ const Measurements = () => {
       });
     }
     
+    // Filtrar por hora
+    if (startTime || endTime) {
+      filtered = filtered.filter(measurement => {
+        const measurementTime = measurement.time;
+        
+        if (startTime && endTime) {
+          return measurementTime >= startTime && measurementTime <= endTime;
+        } else if (startTime) {
+          return measurementTime >= startTime;
+        } else if (endTime) {
+          return measurementTime <= endTime;
+        }
+        
+        return true;
+      });
+    }
+    
     // Filtrar por ubicación
     if (selectedLocation) {
       filtered = filtered.filter(measurement => 
@@ -102,10 +122,10 @@ const Measurements = () => {
     setFilteredMeasurements(filtered);
   };
 
-  // Efecto para aplicar filtros cuando cambian las fechas o la ubicación
+  // Efecto para aplicar filtros cuando cambian las fechas, horas o la ubicación
   useEffect(() => {
     filterMeasurements();
-  }, [startDate, endDate, selectedLocation, measurements]);
+  }, [startDate, endDate, startTime, endTime, selectedLocation, measurements]);
 
   // Función para preparar los datos para exportar a Excel
   const prepareDataForExport = () => {
@@ -116,7 +136,7 @@ const Measurements = () => {
       Temperatura: measurement.allValues?.temperature,
       'Temperatura (°C)': `${measurement.allValues?.temperature} °C`,
       Velocidad: measurement.allValues?.velocity,
-      'Velocidad (m/s)': `${measurement.allValues?.velocity} m/s`,
+      'Velocidad (m/min)': `${measurement.allValues?.velocity} m/min`,
       Caudal: measurement.allValues?.flow,
       'Caudal (m³/s)': `${measurement.allValues?.flow} m³/s`,
       Cobertura: measurement.allValues?.coverage,
@@ -137,7 +157,7 @@ const Measurements = () => {
           Filtros
         </h3>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <div>
             <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Fecha Inicial</label>
             <div className="relative">
@@ -176,6 +196,35 @@ const Measurements = () => {
                 <option key={location} value={location}>{location}</option>
               ))}
             </select>
+          </div>
+        </div>
+        
+        {/* Filtros de hora */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Hora Inicial</label>
+            <div className="relative">
+              <input
+                type="time"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+                className="w-full p-2 pl-9 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+              />
+              <Clock size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            </div>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Hora Final</label>
+            <div className="relative">
+              <input
+                type="time"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+                className="w-full p-2 pl-9 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+              />
+              <Clock size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            </div>
           </div>
         </div>
       </div>
@@ -252,7 +301,7 @@ const Measurements = () => {
                       {measurement.allValues?.temperature} °C
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800 dark:text-gray-200">
-                      {measurement.allValues?.velocity} m/s
+                      {measurement.allValues?.velocity} m/min
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800 dark:text-gray-200">
                       {measurement.allValues?.flow} m³/s
