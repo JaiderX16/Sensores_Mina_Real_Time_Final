@@ -252,7 +252,7 @@ const Dashboard = () => {
                     color="#ef4444"
                     minThreshold={flujoThresholds.min.toFixed(2)}
                     maxThreshold={flujoThresholds.max.toFixed(2)}
-                    unit="m³/h"
+                    unit="m³/min"
                   />
                 </div>
               </div>
@@ -315,7 +315,7 @@ const Dashboard = () => {
                     color="#ef4444"
                     minThreshold={flujoThresholds.min.toFixed(2)}
                     maxThreshold={flujoThresholds.max.toFixed(2)}
-                    unit="m³/h"
+                    unit="m³/min"
                   />
                   <SensorMetricCard
                     icon="Cloud"

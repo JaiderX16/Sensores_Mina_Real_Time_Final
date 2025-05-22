@@ -304,7 +304,7 @@ const Measurements = () => {
                       {measurement.allValues?.velocity} m/min
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800 dark:text-gray-200">
-                      {measurement.allValues?.flow} m³/s
+                      {measurement.allValues?.flow} m³/min
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800 dark:text-gray-200">
                       {measurement.allValues?.coverage} %

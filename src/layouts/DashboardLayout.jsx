@@ -6,6 +6,7 @@ import Dashboard from '../pages/Dashboard';
 import Analytics from '../pages/Analytics';
 import Notifications from '../pages/Notifications';
 import Settings from '../pages/Settings';
+import AlertDetails from '../pages/AlertDetails';
 
 import Measurements from '../pages/Measurements';
 import Environment from '../pages/Environment';
@@ -43,6 +44,7 @@ const DashboardLayout = () => {
             <Route path="/environment" element={<Environment />} />
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/alert-details/:alertId" element={<AlertDetails />} />
           </Routes>
         </main>
       </div>
