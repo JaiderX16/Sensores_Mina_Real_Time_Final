@@ -9,6 +9,12 @@ const Analytics = () => {
   const [mediciones, setMediciones] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Estados para los filtros
+  const [filtroRegistros, setFiltroRegistros] = useState(0); // 0 significa todos los registros
+  const [fechaInicio, setFechaInicio] = useState('');
+  const [fechaFin, setFechaFin] = useState('');
+  const [filtrosAplicados, setFiltrosAplicados] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -71,9 +77,55 @@ const Analytics = () => {
     fetchData();
   }, []);
 
-  // Función para obtener mediciones por área
+  // Función para aplicar filtros
+  const aplicarFiltros = () => {
+    setFiltrosAplicados(true);
+  };
+
+  // Función para resetear filtros
+  const resetearFiltros = () => {
+    setFiltroRegistros(0);
+    setFechaInicio('');
+    setFechaFin('');
+    setFiltrosAplicados(false);
+  };
+
+  // Función para obtener mediciones por área con filtros aplicados
   const getMedicionesByArea = (areaId) => {
-    return mediciones.filter(medicion => medicion.area_id === areaId);
+    let filteredMediciones = mediciones.filter(medicion => medicion.area_id === areaId);
+    
+    // Ordenar por timestamp (más recientes primero)
+    filteredMediciones = [...filteredMediciones].sort((a, b) => 
+      new Date(b.timestamp) - new Date(a.timestamp)
+    );
+    
+    // Aplicar filtro de últimos X registros si está activo
+    if (filtrosAplicados && filtroRegistros > 0) {
+      filteredMediciones = filteredMediciones.slice(0, filtroRegistros);
+    }
+    
+    // Aplicar filtro de rango de fechas si está activo
+    if (filtrosAplicados && (fechaInicio || fechaFin)) {
+      if (fechaInicio) {
+        const fechaInicioObj = new Date(fechaInicio);
+        filteredMediciones = filteredMediciones.filter(medicion => 
+          new Date(medicion.timestamp) >= fechaInicioObj
+        );
+      }
+      
+      if (fechaFin) {
+        const fechaFinObj = new Date(fechaFin);
+        fechaFinObj.setHours(23, 59, 59, 999); // Establecer al final del día
+        filteredMediciones = filteredMediciones.filter(medicion => 
+          new Date(medicion.timestamp) <= fechaFinObj
+        );
+      }
+    }
+    
+    // Volver a ordenar cronológicamente para la visualización (más antiguos primero)
+    return filteredMediciones.sort((a, b) => 
+      new Date(a.timestamp) - new Date(b.timestamp)
+    );
   };
 
   // Función para formatear los datos para los gráficos
@@ -82,12 +134,7 @@ const Analytics = () => {
     
     if (!areaMediciones || areaMediciones.length === 0) return [];
     
-    // Ordenar por timestamp (más antiguos primero para todos los tipos)
-    const sortedData = [...areaMediciones].sort((a, b) => 
-      new Date(a.timestamp) - new Date(b.timestamp)  // Orden cronológico para todos
-    );
-    
-    return sortedData.map(medicion => {
+    return areaMediciones.map(medicion => {
       let valor = 0;
       
       if (tipoMedicion === "temperature") {
@@ -147,6 +194,60 @@ const Analytics = () => {
       <div className="mb-6">
         <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200">Analytics</h1>
         <p className="text-gray-500 dark:text-gray-400 mt-1">Visualización de datos históricos de sensores.</p>
+      </div>
+      
+      {/* Panel de filtros */}
+      <div className="bg-gray-800 rounded-lg shadow p-4 mb-6">
+        <h2 className="text-xl font-semibold mb-4 text-white">Filtros</h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Últimos registros</label>
+            <input 
+              type="number" 
+              min="0"
+              value={filtroRegistros} 
+              onChange={(e) => setFiltroRegistros(parseInt(e.target.value) || 0)}
+              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="0 = todos los registros"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Fecha inicio</label>
+            <input 
+              type="datetime-local" 
+              value={fechaInicio} 
+              onChange={(e) => setFechaInicio(e.target.value)}
+              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Fecha fin</label>
+            <input 
+              type="datetime-local" 
+              value={fechaFin} 
+              onChange={(e) => setFechaFin(e.target.value)}
+              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+        </div>
+        
+        <div className="flex justify-end space-x-2">
+          <button 
+            onClick={resetearFiltros}
+            className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500"
+          >
+            Resetear
+          </button>
+          <button 
+            onClick={aplicarFiltros}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            Aplicar filtros
+          </button>
+        </div>
       </div>
       
       {/* Renderizar áreas dinámicamente */}

@@ -189,7 +189,7 @@ const Dashboard = () => {
             className="h-20 object-contain"
           />
         </div>
-        <h1 className="text-3xl md:text-4xl lg:text-6xl text-white font-bold my-12">Acumulación Yumpag</h1>
+        <h1 className="text-3xl md:text-4xl lg:text-6xl text-[#fbe122] font-bold my-12">Acumulación Yumpag</h1>
       </div>
 
       <div>

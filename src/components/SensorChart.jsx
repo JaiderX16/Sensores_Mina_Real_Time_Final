@@ -78,7 +78,8 @@ export default function SensorChart({
             <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
             <XAxis 
               dataKey="timestamp" 
-              tickFormatter={(timestamp) => format(new Date(timestamp), 'HH:mm')}
+              tickFormatter={(timestamp) => ''}
+              // tickFormatter={(timestamp) => format(new Date(timestamp), 'HH:mm')}
               stroke="#9CA3AF"
             />
             <YAxis 
@@ -86,7 +87,8 @@ export default function SensorChart({
               tickFormatter={(value) => value.toFixed(2)}
             />
             <Tooltip 
-              labelFormatter={(timestamp) => format(new Date(timestamp), 'HH:mm:ss')}
+              labelFormatter={(timestamp) => ''}
+              // tickFormatter={(timestamp) => format(new Date(timestamp), 'HH:mm')}
               contentStyle={{
                 backgroundColor: 'rgba(17, 24, 39, 0.8)',
                 border: 'none',

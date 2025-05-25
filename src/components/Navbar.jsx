@@ -110,7 +110,7 @@ const Navbar = ({ toggleSidebar, darkMode, toggleDarkMode }) => {
   };
 
   return (
-    <header className="bg-white dark:bg-gray-800 shadow-sm z-10">
+    <header className="bg-white dark:bg-[#0039aa] shadow-sm z-10">
       <div className="px-4 md:px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button
@@ -124,7 +124,7 @@ const Navbar = ({ toggleSidebar, darkMode, toggleDarkMode }) => {
           <div className="items-center">
             
             <div>
-              <h1 className="text-lg font-bold text-gray-800 dark:text-white">Compañía de Minas Buenaventura S.A.A.</h1>
+              <h1 className="text-lg font-bold text-[#fbe122] dark:text-[#fbe122]">Compañía de Minas Buenaventura S.A.A.</h1>
             </div>
           </div>
         </div>
