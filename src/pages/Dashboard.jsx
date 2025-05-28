@@ -115,10 +115,13 @@ const Dashboard = () => {
 
   // Función para obtener los umbrales de un tipo de sensor específico
   const getSensorThresholds = (areaId, tipoSensor) => {
+    // Convertir el tipo de sensor para que coincida con la base de datos
+    const tipoSensorDB = tipoSensor === "flujo" ? "caudal" : tipoSensor.toLowerCase();
+    
     // Filtrar sensores por área y tipo
     const sensorFiltrado = sensores.find(sensor => 
       sensor.area_id === areaId && 
-      (sensor.tipo_sensor === tipoSensor || 
+      (sensor.tipo_sensor === tipoSensorDB || 
        sensor.nombre_sensor.includes(tipoSensor))
     );
     
@@ -133,7 +136,8 @@ const Dashboard = () => {
     const defaultThresholds = {
       temperatura: { min: 20, max: 40 },
       velocidad: { min: 5, max: 30 },
-      flujo: { min: 60, max: 120 }
+      // Actualizamos los valores predeterminados para caudal según la base de datos
+      flujo: { min: 400, max: 5000 }
     };
     
     return defaultThresholds[tipoSensor] || { min: 0, max: 100 };
