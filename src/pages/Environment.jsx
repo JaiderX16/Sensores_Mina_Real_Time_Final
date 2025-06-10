@@ -614,16 +614,16 @@ const Environment = () => {
                 {/* // En la sección de renderizado de las áreas */}
                 <div>
                   <label className="block text-base font-medium text-gray-300 mb-2">
-                    F. Corrección (%)
+                    F. Corrección (decimal)
                   </label>
                   <input
                     type="number"
                     step="0.01"
-                    value={area.correction * 100} // Multiplicar por 100 para mostrar como porcentaje
-                    onChange={(e) => handleInputChange(area.id, 'correction', e.target.value / 100)} // Dividir por 100 al guardar
+                    value={area.correction} // Usar directamente el valor decimal
+                    onChange={(e) => handleInputChange(area.id, 'correction', e.target.value)} // Guardar directamente el valor
                     className="w-full p-3 border border-gray-600 rounded-lg bg-gray-700 text-gray-200 text-base"
                     min="0"
-                    max="100" // Cambiar el máximo a 100 para porcentaje
+                    max="1" // Cambiar el máximo a 1 para valor decimal
                   />
                 </div>
               </div>
