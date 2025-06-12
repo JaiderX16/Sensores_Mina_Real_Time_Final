@@ -6,6 +6,76 @@ const INACTIVITY_THRESHOLD = 20 * 60 * 1000; // 20 minutos en ms
 const FETCH_INTERVAL = 5000; // 5 segundos
 const CHECK_INTERVAL = 5000; // 5 segundos
 const API_ENDPOINT = 'https://apisensoresmina-production.up.railway.app/api/mediciones';
+const EMAIL_NOTIFICATION_ENDPOINT = 'jaiderpj16@gmail.com';
+
+// Función para enviar notificación por email
+const sendEmailNotification = async (areaName, sensorType, sensorValue) => {
+  try {
+    const emailData = {
+      to_email: EMAIL_NOTIFICATION_ENDPOINT,
+      subject: `🚨 Alerta de Sensor - ${areaName}`,
+      area_name: areaName,
+      sensor_type: sensorType.charAt(0).toUpperCase() + sensorType.slice(1),
+      sensor_value: sensorValue,
+      timestamp: new Date().toLocaleString('es-ES', {
+        timeZone: 'America/Bogota',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      }),
+      message: `Se ha detectado una posible falla en el sensor de ${sensorType} en el área "${areaName}". El sensor reporta un valor de ${sensorValue}, lo que indica una posible falla del equipo. Se requiere revisión inmediata.`
+    };
+    
+    console.log('🔔 Enviando notificación por email:', emailData);
+    
+    // Implementación usando EmailJS (requiere configuración previa)
+    // Para usar EmailJS, necesitarías:
+    // 1. Instalar: npm install @emailjs/browser
+    // 2. Configurar una cuenta en EmailJS
+    // 3. Descomentar el código siguiente:
+    
+    /*
+    import emailjs from '@emailjs/browser';
+    
+    const result = await emailjs.send(
+      'YOUR_SERVICE_ID',     // ID del servicio de EmailJS
+      'YOUR_TEMPLATE_ID',    // ID de la plantilla de email
+      emailData,
+      'YOUR_PUBLIC_KEY'      // Clave pública de EmailJS
+    );
+    
+    console.log('✅ Email enviado exitosamente:', result.text);
+    */
+    
+    // Alternativa: Envío a través de un endpoint personalizado
+    // Si tienes un backend que maneje el envío de emails:
+    /*
+    const response = await fetch('/api/send-notification-email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      },
+      body: JSON.stringify(emailData)
+    });
+    
+    if (response.ok) {
+      console.log('✅ Notificación enviada exitosamente');
+    } else {
+      throw new Error('Error al enviar la notificación');
+    }
+    */
+    
+    // Por ahora, solo registramos la notificación en consola
+    console.log('📧 Notificación preparada para envío a:', EMAIL_NOTIFICATION_ENDPOINT);
+    
+  } catch (error) {
+    console.error('❌ Error al enviar notificación por email:', error);
+  }
+};
 
 // Configuración inicial de áreas
 const initialSensorState = {
@@ -138,9 +208,11 @@ const SensorActivityMonitor = ({ onInactiveAlert, areas }) => {
           const sensors = {};
           let allSensorsActive = true;
           
-          // Procesar cada sensor
+          // Procesar cada sensor con nueva lógica
           Object.entries(sensorValues).forEach(([key, value]) => {
-            const isActive = value > 0;
+            // Para temperatura, cualquier valor es válido (positivo, negativo o cero)
+            // Para otros sensores, valor cero indica falla
+            const isActive = key === 'temperatura' ? true : value !== 0;
             sensors[key] = { value, isActive };
             
             if (!isActive) allSensorsActive = false;
@@ -211,14 +283,15 @@ const SensorActivityMonitor = ({ onInactiveAlert, areas }) => {
         );
       }
       
-      // Alerta para sensores con valor cero - solo para cambios de estado
+      // Alerta para sensores con valor cero - solo para sensores no de temperatura
       Object.entries(area.sensors).forEach(([sensorKey, sensor]) => {
         const prevSensor = prevArea.sensors[sensorKey];
-        if (sensor.value === 0 && (prevSensor.value !== 0 && prevSensor.value !== null)) {
-          triggerAlert(
-            areaKey,
-            `Sensor de ${sensorKey.charAt(0).toUpperCase() + sensorKey.slice(1)} inactivo: Valor 0 detectado`
-          );
+        // Solo alertar si no es temperatura y el valor cambió a 0
+        if (sensorKey !== 'temperatura' && sensor.value === 0 && (prevSensor.value !== 0 && prevSensor.value !== null)) {
+          const alertMessage = `Sensor de ${sensorKey.charAt(0).toUpperCase() + sensorKey.slice(1)} inactivo: Valor 0 detectado`;
+          triggerAlert(areaKey, alertMessage);
+          // Enviar notificación por email
+          sendEmailNotification(areaNames[areaKey], sensorKey, sensor.value);
         }
       });
     });
@@ -261,7 +334,7 @@ const SensorActivityMonitor = ({ onInactiveAlert, areas }) => {
               ? 'text-white' 
               : 'text-red-400'
           }`}>
-            {sensor.value ? sensor.value.toFixed(2) : "0.00"}
+            {sensor.value !== null ? sensor.value.toFixed(2) : "--"}
           </span>
         ) : (
           <span className="text-sm text-gray-400">--</span>
