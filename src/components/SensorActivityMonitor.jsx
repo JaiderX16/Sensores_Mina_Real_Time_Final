@@ -86,7 +86,7 @@ const initialSensorState = {
     sensors: {
       velocidad: { value: null, isActive: true },
       temperatura: { value: null, isActive: true },
-      flujo: { value: null, isActive: true }
+      caudal: { value: null, isActive: true }
     }
   },
   area2: {
@@ -96,7 +96,7 @@ const initialSensorState = {
     sensors: {
       velocidad: { value: null, isActive: true },
       temperatura: { value: null, isActive: true },
-      flujo: { value: null, isActive: true },
+      caudal: { value: null, isActive: true },
       cobertura: { value: null, isActive: true }
     }
   }
@@ -200,7 +200,7 @@ const SensorActivityMonitor = ({ onInactiveAlert, areas }) => {
           const sensorValues = {
             velocidad: parseFloat(latestData.velocity),
             temperatura: parseFloat(latestData.temperature),
-            flujo: parseFloat(latestData.flow),
+            caudal: parseFloat(latestData.flow),
             ...(areaId === 2 ? { cobertura: parseFloat(latestData.coverage) } : {})
           };
           

@@ -7,7 +7,7 @@ const Notifications = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
-  
+  const [selectedArea, setSelectedArea] = useState('all');
   // Estados para filtros
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -191,6 +191,22 @@ const Notifications = () => {
                 </div>
               </div>
             </div>
+            
+            {/* Filtro de Área */}
+            <div className="md:col-span-2">
+              <label className="block text-gray-400 mb-2 text-sm">Área</label>
+              <div className="relative">
+                <select
+                  value={selectedArea}
+                  onChange={(e) => setSelectedArea(e.target.value)}
+                  className="w-full bg-gray-700 border-none px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg"
+                >
+                  <option value="all">Todas las áreas</option>
+                  <option value="rampa">Rampa</option>
+                  <option value="bocamina">Bocamina</option>
+                </select>
+              </div>
+            </div>
           </div>
           
           {/* Botones de acción */}
@@ -201,6 +217,7 @@ const Notifications = () => {
                 setEndDate('');
                 setStartTime('');
                 setEndTime('');
+                setSelectedArea('all');
               }}
               className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
             >
@@ -222,15 +239,19 @@ const Notifications = () => {
         ) : error ? (
           <div className="text-red-500">Error: {error}</div>
         ) : (
-          areas.map((area, index) => (
-            <div key={area.id}>
-              <h1 className="text-gray-800 dark:text-white font-bold text-xl mb-6 flex items-center">
-                <span className={`${index === 0 ? 'bg-blue-500' : 'bg-green-500'} w-2 h-8 mr-3 rounded`}></span>
-                {area.nombre_area}
-              </h1>
-              <AlertsList areaId={area.id} filterTimeRange={filterTimeRange} />
-            </div>
-          ))
+          areas
+            .filter(area => selectedArea === 'all' || 
+              (selectedArea === 'rampa' && area.nombre_area.toLowerCase().includes('rampa')) ||
+              (selectedArea === 'bocamina' && area.nombre_area.toLowerCase().includes('bocamina')))
+            .map((area, index) => (
+              <div key={area.id}>
+                <h1 className="text-gray-800 dark:text-white font-bold text-xl mb-6 flex items-center">
+                  <span className={`${index === 0 ? 'bg-blue-500' : 'bg-green-500'} w-2 h-8 mr-3 rounded`}></span>
+                  {area.nombre_area}
+                </h1>
+                <AlertsList areaId={area.id} filterTimeRange={filterTimeRange} />
+              </div>
+            ))
         )}
       </div>
     </div>
