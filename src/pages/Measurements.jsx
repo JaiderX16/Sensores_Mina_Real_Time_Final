@@ -138,7 +138,7 @@ const Measurements = () => {
       Velocidad: measurement.allValues?.velocity,
       'Velocidad (m/min)': `${measurement.allValues?.velocity} m/min`,
       Caudal: measurement.allValues?.flow,
-      'Caudal (m³/s)': `${measurement.allValues?.flow} m³/s`,
+      'Caudal (m³/min)': `${measurement.allValues?.flow} m³/min`,
       Cobertura: measurement.allValues?.coverage,
       'Cobertura (%)': `${measurement.allValues?.coverage} %`
     }));
